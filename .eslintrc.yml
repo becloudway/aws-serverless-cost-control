@@ -1,0 +1,24 @@
+extends: airbnb-base
+env:
+  node: true
+  mocha: true
+rules:
+  indent:
+    - error
+    - 4
+  no-param-reassign: 0
+  no-use-before-define:
+    - 2
+    - functions: false
+  no-return-await: 0
+  max-len:
+    - 1
+    - 150
+  camelcase: 1
+  no-console: 2
+  no-unused-expressions:
+    - 2
+    - allowTernary: true
+settings:
+  import/core-modules:
+    - aws-sdk
