@@ -1,5 +1,5 @@
 const config = require('./config');
-const { LAMBDA, TAG } = require('./clients');
+const { TAG } = require('./clients');
 const Resource = require('./resource');
 
 module.exports = class ResourceManager {
@@ -20,9 +20,9 @@ module.exports = class ResourceManager {
         });
         this.resources = taggedResources.ResourceTagMappingList.map((res) => {
             const arn = res.ResourceARN;
-            const [,, service,,, type, resourceId] = arn.split(':');
+            const [,, service, region,, type, resourceId] = arn.split(':');
             return new Resource({
-                type, resourceId, service, arn,
+                type, resourceId, service, arn, region,
             });
         });
     }
