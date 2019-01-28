@@ -55,11 +55,11 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  awspricecalculator:
-    handler: functions/index.handler
+  sermo-calculator:
+    handler: functions/sermo-calculator/index.handler
     name: calculate-near-realtime-pricing
     timeout: 300
-    memory: 1024
+    memory: 512
     events:
       - schedule:
           rate: rate(5 minutes)
@@ -68,6 +68,12 @@ functions:
             tag:
               key: ${env:PRICING_TAG_KEY}
               value: ${env:PRICING_TAG_VALUE}
+
+  sermo-inhibitor:
+    handler: functions/sermo-inhibitor/index.handler
+    name: inhibit-runaway-functions
+    timeout: 300
+    memory: 512
 
 # you can add CloudFormation resource templates here
 #resources:

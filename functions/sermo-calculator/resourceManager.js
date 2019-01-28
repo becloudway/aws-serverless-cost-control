@@ -18,6 +18,7 @@ module.exports = class ResourceManager {
             }],
             resourceTypeFilters: config.RESOURCE_MAP,
         });
+
         this.resources = taggedResources.ResourceTagMappingList.map((res) => {
             const arn = res.ResourceARN;
             const [,, service, region,, type, resourceId] = arn.split(':');
@@ -25,6 +26,8 @@ module.exports = class ResourceManager {
                 type, resourceId, service, arn, region,
             });
         });
+
+        return this;
     }
 
     getResources(service, type) {

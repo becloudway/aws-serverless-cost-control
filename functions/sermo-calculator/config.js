@@ -42,7 +42,7 @@ module.exports = {
     ],
     metrics: {
         METRIC_WINDOW: 5,
-        METRIC_DELAY: 10,
+        METRIC_DELAY: 0,
         NAME_SPACE: 'Cloudway/Serverless/PricingForecast',
         NAME_ESTIMATEDCHARGES: 'EstimatedCharges',
         DIMENSIONS: {
@@ -69,5 +69,8 @@ module.exports = {
     },
     regions: {
         NAME: REGION_MAP_CODE_TO_NAME,
+        CURRENT_REGION: process.env.AWS_REGION || 'eu-west-1',
+        IRELAND: 'eu-west-1',
+        NORTH_VIRGINIA: 'us-east-1',
     },
 };

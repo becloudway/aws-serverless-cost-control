@@ -67,7 +67,7 @@ var params = {
 };
 */
     putMetricData({
-        timestamp, cost, service, resourceId, tagKey, tagValue,
+        timestamp, cost, service, tagKey, tagValue,
     }) {
         return new Promise((resolve, reject) => {
             this.client.putMetricData({
@@ -83,10 +83,6 @@ var params = {
                             Value: service,
                         },
                         {
-                            Name: config.metrics.DIMENSIONS.RESOURCE_ID,
-                            Value: resourceId,
-                        },
-                        {
                             Name: config.metrics.DIMENSIONS.PERIOD,
                             Value: config.forecast.PERIOD_DEFAULT,
                         },
@@ -100,7 +96,7 @@ var params = {
                         },
                     ],
                 }],
-            }, (err, data) => {
+            }, (err) => {
                 if (err) reject(err);
                 resolve();
             });
