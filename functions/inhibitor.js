@@ -3,13 +3,19 @@ const config = require('./config');
 const { LAMBDA } = require('./clients');
 const log = require('./logger');
 
-const parseTagFromEvent = ({ tag }) => {
-    if (tag) return { tagKey: tag.key, tagValue: tag.value };
-    throw new Error('No tags specified');
+const parseTagFromEvent = ({ Records }) => {
+    const snsMessage = Records[0] && Records[0].Sns.Message;
+    const dimensions = JSON.parse(snsMessage).Trigger.Dimensions;
+    const tag = dimensions.find(d => d.name === 'Tag');
+
+    if (!tag) throw new Error('No tags specified');
+    const [tagKey, tagValue] = tag.value.split('=');
+    return { tagKey, tagValue };
 };
 
-exports.handler = async (event) => {
-    log.info('Received event', event);
+exports.handler = async (event, context) => {
+    log.info('Received event', JSON.stringify(event, null, 2));
+    log.info('Received constext', JSON.stringify(context, null, 2));
 
     try {
         const { tagKey, tagValue } = parseTagFromEvent(event);
