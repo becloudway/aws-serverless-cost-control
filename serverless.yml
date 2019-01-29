@@ -1,4 +1,4 @@
-service: sermo-nodejs
+service: cloudway-sermo
 
 provider:
   name: aws
@@ -20,8 +20,10 @@ provider:
       Resource: "*"
 
 custom:
+  stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
   scheduleRate: rate(5 minutes)
-  lambdaTopic: sermo-lambda-topic
+  lambdaAlertTopic: ${self:service}-lambda-${self:custom.stage}
 
 package:
   exclude:
@@ -30,7 +32,7 @@ package:
 functions:
   calculator:
     handler: functions/calculator.handler
-    name: sermocalculator
+    name: ${self:service}-calculator
     timeout: 300
     memory: 512
     events:
@@ -45,22 +47,39 @@ functions:
       METRICS_NAMESPACE: ${env:METRICS_NAMESPACE}
   inhibitor:
     handler: functions/inhibitor.handler
-    name: sermoinhibitor
+    name: ${self:service}-inhibitor
     timeout: 300
     memory: 512
     events:
-      - sns: ${self:custom.lambdaTopic}
+      - sns: ${self:custom.lambdaAlertTopic}
     environment:
       METRICS_NAMESPACE: ${env:METRICS_NAMESPACE}
 
 # you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+resources:
+  Resources:
+    LambdaThresholdBreached:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        ActionsEnabled: true
+        AlarmActions:
+          - { "Fn::Join" : ["", ["arn:aws:sns:${self:custom.region}:", { "Ref" : "AWS::AccountId" }, ":${self:custom.lambdaAlertTopic}" ] ]  }
+        AlarmName: { "Fn::Join" : ["", ["${self:service}", "-", "lambda-threshold", "-", "${self:custom.stage}" ] ]  }
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        DatapointsToAlarm: 1
+        Dimensions:
+          - Name: Currency
+            Value: USD
+          - Name: ForecastPeriod
+            Value: monthly
+          - Name: ServiceName
+            Value: lambda
+          - Name: Tag
+            Value: ${env:PRICING_TAG_KEY}=${env:PRICING_TAG_VALUE}
+        EvaluationPeriods: 1
+        MetricName: EstimatedCharges
+        Namespace: ${env:METRICS_NAMESPACE}
+        Period: 300
+        Statistic: Maximum
+        Threshold: 10.0
+        TreatMissingData: missing
