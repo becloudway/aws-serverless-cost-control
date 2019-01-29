@@ -6,6 +6,16 @@ module.exports = class Lambda {
         this.clwClient = clwClient;
     }
 
+    throttle(resource, allowedConcurrentExecutions = 1) {
+        return new Promise((resolve, reject) => this.client.putFunctionConcurrency({
+            FunctionName: resource.id,
+            ReservedConcurrentExecutions: allowedConcurrentExecutions,
+        }, (err) => {
+            if (err) reject(err);
+            resolve();
+        }));
+    }
+
     async calculateLambdaExecutions(resource, start, end) {
         const invocations = await this.clwClient.getMetricStatistics({
             nameSpace: 'AWS/Lambda',

@@ -1,26 +1,9 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
-service: aws-nodejs # NOTE: update this with your service name
+service: sermo-nodejs
 
 provider:
   name: aws
   runtime: nodejs8.10
   profile: sandbox
-
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
 
   iamRoleStatements:
     - Effect: "Allow"
@@ -36,44 +19,41 @@ provider:
         - kinesis:Describe*
         - kinesis:List*
         - lambda:GetFunctionConfiguration
+        - lambda:PutFunctionConcurrency
         - tag:getResources
         - tag:getTagKeys
         - tag:getTagValues
       Resource: "*"
 
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
+custom:
+  scheduleRate: rate(5 minutes)
+  lambdaTopic: sermo-lambda-topic
 
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
+package:
+  exclude:
+    node_modules/aws-sdk
 
 functions:
-  sermo-calculator:
-    handler: functions/sermo-calculator/index.handler
-    name: calculate-near-realtime-pricing
+  calculator:
+    handler: functions/calculator.handler
+    name: sermocalculator
     timeout: 300
     memory: 512
     events:
       - schedule:
-          rate: rate(5 minutes)
+          rate: ${self:custom.scheduleRate}
           enabled: true
           input:
             tag:
               key: ${env:PRICING_TAG_KEY}
               value: ${env:PRICING_TAG_VALUE}
-
-  sermo-inhibitor:
-    handler: functions/sermo-inhibitor/index.handler
-    name: inhibit-runaway-functions
+  inhibitor:
+    handler: functions/inhibitor.handler
+    name: sermoinhibitor
     timeout: 300
     memory: 512
+    events:
+      - sns: ${self:custom.lambdaTopic}
 
 # you can add CloudFormation resource templates here
 #resources:

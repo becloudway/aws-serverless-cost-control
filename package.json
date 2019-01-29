@@ -4,21 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "invoke:calculator": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function sermo-calculator --path tags.json --region=$AWS_REGION",
-    "invoke:inhibitor": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function sermo-inhibitor --path tags.json --region=$AWS_REGION"
+    "invoke:calculator": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function calculator --path tags.json --region=$AWS_REGION",
+    "invoke:inhibitor": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function inhibitor --path tags.json --region=$AWS_REGION"
   },
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "aws-sdk": "^2.394.0",
-    "date-fns": "^1.30.1",
-    "log4js": "^4.0.0"
-  },
-  "devDependencies": {
-    "eslint": "^5.12.1",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.15.0",
-    "jest": "^24.0.0"
-  }
+  "license": "ISC"
 }
