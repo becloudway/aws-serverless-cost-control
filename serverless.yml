@@ -9,20 +9,14 @@ provider:
     - Effect: "Allow"
       Action:
         - cloudwatch:*
-        - ec2:Describe*
-        - elasticloadbalancing:Describe*
-        - autoscaling:Describe*
-        - rds:Describe*
-        - rds:List*
-        - dynamodb:Describe*
-        - dynamodb:List*
-        - kinesis:Describe*
-        - kinesis:List*
         - lambda:GetFunctionConfiguration
         - lambda:PutFunctionConcurrency
         - tag:getResources
         - tag:getTagKeys
         - tag:getTagValues
+        - pricing:GetProducts
+        - pricing:DescribeServices
+        - pricing:GetAttributeValues
       Resource: "*"
 
 custom:
@@ -47,6 +41,8 @@ functions:
             tag:
               key: ${env:PRICING_TAG_KEY}
               value: ${env:PRICING_TAG_VALUE}
+    environment:
+      METRICS_NAMESPACE: ${env:METRICS_NAMESPACE}
   inhibitor:
     handler: functions/inhibitor.handler
     name: sermoinhibitor
@@ -54,6 +50,8 @@ functions:
     memory: 512
     events:
       - sns: ${self:custom.lambdaTopic}
+    environment:
+      METRICS_NAMESPACE: ${env:METRICS_NAMESPACE}
 
 # you can add CloudFormation resource templates here
 #resources:

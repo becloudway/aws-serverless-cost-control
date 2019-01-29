@@ -43,7 +43,7 @@ module.exports = {
     metrics: {
         METRIC_WINDOW: 5,
         METRIC_DELAY: 0,
-        NAME_SPACE: 'Cloudway/Serverless/PricingForecast',
+        NAME_SPACE: process.env.METRICS_NAMESPACE, // 'Cloudway/Serverless/PricingForecast',
         NAME_ESTIMATEDCHARGES: 'EstimatedCharges',
         DIMENSIONS: {
             SERVICE_NAME: 'ServiceName',

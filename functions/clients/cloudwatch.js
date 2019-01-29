@@ -30,42 +30,6 @@ module.exports = class Cloudwatch {
         });
     }
 
-    /*
-var params = {
-  MetricData: [ /* required *
-    {
-      MetricName: 'STRING_VALUE', /* required *
-      Counts: [
-        0.0,
-          /* more items *
-      ],
-      Dimensions: [
-        {
-          Name: 'STRING_VALUE', /* required *
-          Value: 'STRING_VALUE' /* required *
-        },
-          /* more items *
-      ],
-      StatisticValues: {
-        Maximum: 0.0, /* required *
-        Minimum: 0.0, /* required *
-        SampleCount: 0.0, /* required *
-        Sum: 0.0 /* required *
-      },
-      StorageResolution: 0,
-      Timestamp: new Date || 'Wed Dec 31 1969 16:00:00 GMT-0800 (PST)' || 123456789,
-      Unit: Seconds | Microseconds | Milliseconds | Bytes | Kilobytes | Megabytes | Gigabytes | Terabytes | Bits | Kilobits | Megabits | Gigabits | Terabits | Percent | Count | Bytes/Second | Kilobytes/Second | Megabytes/Second | Gigabytes/Second | Terabytes/Second | Bits/Second | Kilobits/Second | Megabits/Second | Gigabits/Second | Terabits/Second | Count/Second | None,
-      Value: 0.0,
-      Values: [
-        0.0,
-          /* more items *
-      ]
-    },
-      /* more items *
-  ],
-  Namespace: 'STRING_VALUE' /* required *
-};
-*/
     putMetricData({
         timestamp, cost, service, tagKey, tagValue,
     }) {
