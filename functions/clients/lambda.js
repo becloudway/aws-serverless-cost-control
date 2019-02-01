@@ -16,7 +16,7 @@ module.exports = class Lambda {
         }));
     }
 
-    async calculateLambdaExecutions(resource, start, end) {
+    async calculateLambdaInvocations(resource, start, end) {
         const invocations = await this.clwClient.getMetricStatistics({
             nameSpace: 'AWS/Lambda',
             metricName: 'Invocations',

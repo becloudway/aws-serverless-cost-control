@@ -30,10 +30,10 @@ test('calculates correct pricing #1', () => {
     lambdaDimension.requestCount = 3 * ONE_MILLION;
     lambdaDimension.memory = 512;
 
-    const pricingRecord = lambdaPricing.calculate([lambdaDimension], { includeFreeTier: true });
-    expect(pricingRecord.monthlyComputeCharges).toEqual('18.33');
-    expect(pricingRecord.monthlyRequestCharges).toEqual('0.40');
-    expect(pricingRecord.totalCost).toEqual('18.73');
+    const pricingRecord = lambdaPricing.calculate([lambdaDimension]);
+    expect(pricingRecord.computeCharges).toEqual('25.00');
+    expect(pricingRecord.requestCharges).toEqual('0.60');
+    expect(pricingRecord.totalCost).toEqual('25.60');
 });
 
 test('calculates correct pricing #2', () => {
@@ -42,10 +42,10 @@ test('calculates correct pricing #2', () => {
     lambdaDimension.requestCount = 30 * ONE_MILLION;
     lambdaDimension.memory = 128;
 
-    const pricingRecord = lambdaPricing.calculate([lambdaDimension], { includeFreeTier: true });
-    expect(pricingRecord.monthlyComputeCharges).toEqual('5.83');
-    expect(pricingRecord.monthlyRequestCharges).toEqual('5.80');
-    expect(pricingRecord.totalCost).toEqual('11.63');
+    const pricingRecord = lambdaPricing.calculate([lambdaDimension]);
+    expect(pricingRecord.computeCharges).toEqual('12.50');
+    expect(pricingRecord.requestCharges).toEqual('6.00');
+    expect(pricingRecord.totalCost).toEqual('18.50');
 });
 
 test('calculates correct pricing for multiple lambdas', () => {
@@ -62,8 +62,8 @@ test('calculates correct pricing for multiple lambdas', () => {
     lambdaDimension3.requestCount = 2.5 * ONE_MILLION;
     lambdaDimension3.memory = 1024;
 
-    const pricingRecord = lambdaPricing.calculate([lambdaDimension1, lambdaDimension2, lambdaDimension3], { includeFreeTier: true });
-    expect(pricingRecord.monthlyComputeCharges).toEqual('63.65');
-    expect(pricingRecord.monthlyRequestCharges).toEqual('6.30');
-    expect(pricingRecord.totalCost).toEqual('69.95');
+    const pricingRecord = lambdaPricing.calculate([lambdaDimension1, lambdaDimension2, lambdaDimension3]);
+    expect(pricingRecord.computeCharges).toEqual('70.31');
+    expect(pricingRecord.requestCharges).toEqual('6.50');
+    expect(pricingRecord.totalCost).toEqual('76.81');
 });

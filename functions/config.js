@@ -1,17 +1,9 @@
-// const SERVICE_EC2 = 'ec2';
-// const SERVICE_RDS = 'rds';
-// const SERVICE_ELB = 'elasticloadbalancing';
+const SERVICE_RDS = 'rds';
 const SERVICE_LAMBDA = 'lambda';
 // const SERVICE_DYNAMODB = 'dynamodb';
 // const SERVICE_KINESIS = 'kinesis';
 const RESOURCE_LAMBDA_FUNCTION = 'function';
-// const RESOURCE_ELB = 'loadbalancer';
-// const RESOURCE_ALB = 'loadbalancer/app';
-// const RESOURCE_NLB = 'loadbalancer/net';
-// const RESOURCE_EC2_INSTANCE = 'instance';
-// const RESOURCE_RDS_DB_INSTANCE = 'db';
-// const RESOURCE_EBS_VOLUME = 'volume';
-// const RESOURCE_EBS_SNAPSHOT = 'snapshot';
+const RESOURCE_RDS_CLUSTER_INSTANCE = 'cluster';
 // const RESOURCE_DDB_TABLE = 'table';
 // const RESOURCE_STREAM = 'stream';
 
@@ -36,19 +28,22 @@ const REGION_MAP_CODE_TO_NAME = {
 
 module.exports = {
     SERVICE_LAMBDA,
+    SERVICE_RDS,
     RESOURCE_LAMBDA_FUNCTION,
+    RESOURCE_RDS_CLUSTER_INSTANCE,
     RESOURCE_MAP: [
         `${SERVICE_LAMBDA}:${RESOURCE_LAMBDA_FUNCTION}`,
+        `${SERVICE_RDS}:${RESOURCE_RDS_CLUSTER_INSTANCE}`,
     ],
     metrics: {
-        METRIC_WINDOW: 5,
-        METRIC_DELAY: 0,
+        METRIC_WINDOW: 1,
+        METRIC_DELAY: 1,
         NAME_SPACE: process.env.METRICS_NAMESPACE, // 'Cloudway/Serverless/PricingForecast',
         NAME_ESTIMATEDCHARGES: 'EstimatedCharges',
         DIMENSIONS: {
             SERVICE_NAME: 'ServiceName',
             RESOURCE_ID: 'RecourceId',
-            PERIOD: 'ForecastPeriod',
+            WINDOW: 'window',
             CURRENCY: 'Currency',
             TAG: 'Tag',
             SERVICE_NAME_EC2: 'ec2',
@@ -60,9 +55,10 @@ module.exports = {
             CURRENCY_USD: 'USD',
         },
     },
-    forecast: {
+    window: {
         MONTHLY: 730.48,
         HOURLY: 1,
+        FIVE_MINUTES: '5min',
         PERIOD_MONTHLY: 'monthly',
         PERIOD_HOURLY: 'hourly',
         PERIOD_DEFAULT: 'monthly',

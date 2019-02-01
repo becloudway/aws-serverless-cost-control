@@ -22,7 +22,7 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
-  scheduleRate: rate(5 minutes)
+  scheduleRate: rate(1 minute)
   lambdaAlertTopic: ${self:service}-lambda-${self:custom.stage}
 
 package:
@@ -70,8 +70,6 @@ resources:
         Dimensions:
           - Name: Currency
             Value: USD
-          - Name: ForecastPeriod
-            Value: monthly
           - Name: ServiceName
             Value: lambda
           - Name: Tag
