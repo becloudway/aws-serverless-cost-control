@@ -1,5 +1,4 @@
 const ResourceManager = require('./resourceManager');
-const config = require('./config');
 const { LAMBDA, DYNAMODB, RDS } = require('./clients');
 const log = require('./logger');
 
@@ -22,7 +21,7 @@ const parseTagFromEvent = ({ Records }) => {
 
 const action = {
     lambda: resource => LAMBDA.throttle(resource, 1),
-    rds: () => Promise.resolve(),
+    rds: () => resource => RDS.throttle(resource, { maxCapacity: 2, minCapacity: 2, autoPause: true }),
     dynamodb: resource => DYNAMODB.throttle(resource, { readCapacityUnits: 1, writeCapacityUnits: 1 }),
 };
 

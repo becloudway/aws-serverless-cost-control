@@ -47,6 +47,7 @@ module.exports = class Dynamodb {
 
     async throttle(resource, { readCapacityUnits = 1, writeCapacityUnits = 1 } = {}) {
         return new Promise((resolve, reject) => this.client.updateTable({
+            TableName: resource.id,
             BillingMode: 'PROVISIIONED',
             ProvisionedThroughput: {
                 ReadCapacityUnits: readCapacityUnits,

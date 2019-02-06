@@ -48,4 +48,19 @@ module.exports = class Rds {
         if (!ioRequestsMetric.Datapoints || ioRequestsMetric.Datapoints.length === 0) return 0;
         return ioRequestsMetric.Datapoints.reduce((acc, curr) => acc + (curr.Average || 0), 0) / ioRequestsMetric.Datapoints.length;
     }
+
+    async throttle(resource, { minCapacity = 2, maxCapacity = 2, autoPause = true }) {
+        return new Promise((resolve, reject) => this.client.modifyDBCluster({
+            DBClusterIdentifier: resource.id,
+            ApplyImmediately: true,
+            ScalingConfiguration: {
+                AutoPause: autoPause,
+                MaxCapacity: maxCapacity,
+                MinCapacity: minCapacity,
+            },
+        }, (err, data) => {
+            if (err) reject(err);
+            resolve(data);
+        }));
+    }
 };
