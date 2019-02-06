@@ -2,8 +2,8 @@ const { subMinutes } = require('date-fns');
 const ResourceManager = require('./resourceManager');
 const config = require('./config');
 const { CLOUDWATCH } = require('./clients');
-const { LambdaPricing, RdsPricing } = require('./pricing');
-const { LambdaDimension, RdsDimension } = require('./dimension');
+const pricing = require('./pricing');
+const dimension = require('./dimension');
 const log = require('./logger');
 
 const parseTagFromEvent = ({ tag }) => {
@@ -17,43 +17,26 @@ const getTimeRange = () => {
     return { start, end };
 };
 
-const getLambdaCostRecords = async (resourceManager, start, end) => {
-    const lambdaFunctions = await resourceManager.getResources(
-        config.SERVICE_LAMBDA,
-        config.RESOURCE_LAMBDA_FUNCTION,
-    );
+class CostRecord {
+    constructor({ serviceName, resourceType, resourceManager }) {
+        this.serviceName = serviceName;
+        this.resourceType = resourceType;
+        this.resourceManager = resourceManager;
+        this.Pricing = pricing[this.serviceName];
+        this.Dimension = dimension[this.serviceName];
+    }
 
-    const lambdaDimensions = await Promise.all(lambdaFunctions.map(
-        lambdaFunction => new LambdaDimension({ start, end, lambdaFunction }).create(),
-    ));
+    async fetch(start, end) {
+        const resources = await this.resourceManager.getResources(this.serviceName, this.resourceType);
+        const dimensions = await Promise.all(resources.map(resource => new this.Dimension({ start, end, resource }).create()));
+        const pricingScheme = await new this.Pricing().init();
+        const costRecords = pricingScheme.calculate(dimensions);
 
-    const lambdaPricing = new LambdaPricing();
-    await lambdaPricing.init();
-    const costRecords = lambdaPricing.calculate(lambdaDimensions);
+        log.info(`Cost records for ${this.serviceName.toUpperCase()}`, costRecords);
 
-    log.info('Cost records for LAMBDA', costRecords);
-
-    return costRecords;
-};
-
-const getRdsCostRecords = async (resourceManager, start, end) => {
-    const rdsClusters = await resourceManager.getResources(
-        config.SERVICE_RDS,
-        config.RESOURCE_RDS_CLUSTER_INSTANCE,
-    );
-
-    const rdsDimensions = await Promise.all(rdsClusters.map(
-        rdsCluster => new RdsDimension({ start, end, rdsCluster }).create(),
-    ));
-
-    const rdsPricing = new RdsPricing();
-    await rdsPricing.init();
-    const costRecords = rdsPricing.calculate(rdsDimensions);
-
-    log.info('Cost records for RDS', costRecords);
-
-    return costRecords;
-};
+        return costRecords;
+    }
+}
 
 exports.handler = async (event) => {
     log.info('Received event', event);
@@ -63,11 +46,25 @@ exports.handler = async (event) => {
         const { start, end } = getTimeRange();
         const resourceManager = await new ResourceManager({ tagKey, tagValue }).init();
 
-        const lambdaCostRecords = await getLambdaCostRecords(resourceManager, start, end);
-        const rdsCostRecords = await getRdsCostRecords(resourceManager, start, end);
+        const lambdaCostRecords = []; /* await new CostRecord({
+            serviceName: config.SERVICE_LAMBDA,
+            resourceType: config.RESOURCE_LAMBDA_FUNCTION,
+            resourceManager,
+        }).fetch(start, end); */
+        const rdsCostRecords = []; /* await new CostRecord({
+            serviceName: config.SERVICE_RDS,
+            resourceType: config.RESOURCE_RDS_CLUSTER_INSTANCE,
+            resourceManager,
+        }).fetch(start, end); */
+        const dynamoDBCostRecords = await new CostRecord({
+            serviceName: config.SERVICE_DYNAMODB,
+            resourceType: config.RESOURCE_DYNAMODB_TABLE,
+            resourceManager,
+        }).fetch(start, end);
 
         await Promise.all([
             ...lambdaCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
+                metricName: config.metrics.NAME_COST,
                 service: 'lambda',
                 cost: parseFloat(costRecord.totalCost),
                 resourceId: costRecord.resourceId,
@@ -75,7 +72,17 @@ exports.handler = async (event) => {
                 tagValue,
                 timestamp: end,
             })),
+            ...lambdaCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
+                metricName: config.metrics.NAME_ESTIMATEDCHARGES,
+                service: 'lambda',
+                cost: parseFloat(costRecord.estimatedMonthlyCharge),
+                resourceId: costRecord.resourceId,
+                tagKey,
+                tagValue,
+                timestamp: end,
+            })),
             ...rdsCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
+                metricName: config.metrics.NAME_COST,
                 service: 'rds',
                 cost: parseFloat(costRecord.totalCost),
                 resourceId: costRecord.resourceId,
@@ -83,8 +90,34 @@ exports.handler = async (event) => {
                 tagValue,
                 timestamp: end,
             })),
+            ...rdsCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
+                metricName: config.metrics.NAME_ESTIMATEDCHARGES,
+                service: 'rds',
+                cost: parseFloat(costRecord.estimatedMonthlyCharge),
+                resourceId: costRecord.resourceId,
+                tagKey,
+                tagValue,
+                timestamp: end,
+            })),
+            ...dynamoDBCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
+                metricName: config.metrics.NAME_COST,
+                service: 'dynamoDB',
+                cost: parseFloat(costRecord.totalCost),
+                resourceId: costRecord.resourceId,
+                tagKey,
+                tagValue,
+                timestamp: end,
+            })),
+            ...dynamoDBCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
+                metricName: config.metrics.NAME_ESTIMATEDCHARGES,
+                service: 'dynamoDB',
+                cost: parseFloat(costRecord.estimatedMonthlyCharge),
+                resourceId: costRecord.resourceId,
+                tagKey,
+                tagValue,
+                timestamp: end,
+            })),
         ]);
-
 
         return { status: 200 };
     } catch (e) {

@@ -1,11 +1,10 @@
+const DimensionAbstract = require('./DimensionAbstract');
 const { LAMBDA } = require('../clients');
 const log = require('../logger');
 
-module.exports = class LambdaDimension {
-    constructor({ start = new Date(), end, lambdaFunction }) {
-        this.start = start;
-        this.end = end;
-        this.function = lambdaFunction;
+module.exports = class LambdaDimension extends DimensionAbstract {
+    constructor({ start = new Date(), end, resource }) {
+        super({ start, end, resource });
         this.averageDuration = 0;
         this.requestCount = 0;
         this.memory = null;
@@ -16,13 +15,13 @@ module.exports = class LambdaDimension {
     }
 
     async create() {
-        this.requestCount = await LAMBDA.calculateLambdaInvocations(this.function, this.start, this.end);
-        this.averageDuration = await LAMBDA.calculateLambdaDuration(this.function, this.start, this.end);
-        this.memory = await LAMBDA.getMemory(this.function);
+        this.requestCount = await LAMBDA.calculateLambdaInvocations(this.resource, this.start, this.end);
+        this.averageDuration = await LAMBDA.calculateLambdaDuration(this.resource, this.start, this.end);
+        this.memory = await LAMBDA.getMemory(this.resource);
 
         log.info(
             'Executions for Lambda function %s: %d - Memory: %dMb - Avg Duration: %dms',
-            this.function.id, this.requestCount, this.memory, this.averageDuration,
+            this.resource.id, this.requestCount, this.memory, this.averageDuration,
         );
 
         return this;

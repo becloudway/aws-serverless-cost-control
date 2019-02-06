@@ -38,7 +38,10 @@ module.exports = class Pricing {
         return products.PriceList.map((pr) => {
             const terms = pr.terms[termType];
             const { priceDimensions } = terms[Object.keys(terms)[0]];
-            const priceDimension = priceDimensions[Object.keys(priceDimensions)[0]];
+            const priceDimension = Object.keys(priceDimensions)
+                .map(key => priceDimensions[key])
+                .find(pd => pd.endRange === 'Inf');
+
             return {
                 version: pr.version,
                 group: pr.product.attributes.group,

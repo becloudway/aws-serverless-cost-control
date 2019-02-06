@@ -46,7 +46,7 @@ module.exports = class Lambda {
         return duration.Datapoints.reduce((acc, curr) => acc + (curr.Average || 0), 0) / duration.Datapoints.length;
     }
 
-    getMemory(resource, qualifier) {
+    getMemory(resource) {
         return new Promise((resolve, reject) => this.client.getFunctionConfiguration({
             FunctionName: resource.id,
         }, (err, data) => {

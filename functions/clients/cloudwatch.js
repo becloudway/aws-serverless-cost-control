@@ -31,7 +31,7 @@ module.exports = class Cloudwatch {
     }
 
     putMetricData({
-        timestamp, cost, service, resourceId, tagKey, tagValue,
+        timestamp, cost, service, resourceId, tagKey, tagValue, metricName,
     }) {
         return new Promise((resolve, reject) => {
             this.client.putMetricData({
@@ -40,7 +40,7 @@ module.exports = class Cloudwatch {
                     Timestamp: timestamp,
                     Value: cost,
                     Unit: 'Count',
-                    MetricName: config.metrics.NAME_ESTIMATEDCHARGES,
+                    MetricName: metricName,
                     Dimensions: [
                         {
                             Name: config.metrics.DIMENSIONS.SERVICE_NAME,

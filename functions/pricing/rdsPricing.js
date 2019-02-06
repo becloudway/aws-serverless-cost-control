@@ -1,15 +1,10 @@
+const { differenceInSeconds } = require('date-fns');
+const PricingAbstract = require('./PricingAbstract');
 const config = require('../config');
-const { PRICING } = require('../clients');
 
-const CURRENCY = 'USD';
-
-module.exports = class LambdaPricing {
-    constructor() {
-        this.region = config.regions.CURRENT_REGION;
-    }
-
+module.exports = class RdsPricing extends PricingAbstract {
     async init() {
-        const acuPricing = await PRICING.getProducts({
+        const acuPricing = await this.pricingClient.getProducts({
             serviceCode: 'AmazonRDS',
             region: this.region,
             filters: [
@@ -17,7 +12,7 @@ module.exports = class LambdaPricing {
             ],
         });
 
-        const iopsPricing = await PRICING.getProducts({
+        const iopsPricing = await this.pricingClient.getProducts({
             serviceCode: 'AmazonRDS',
             region: this.region,
             filters: [
@@ -27,7 +22,7 @@ module.exports = class LambdaPricing {
             ],
         });
 
-        const storagePricing = await PRICING.getProducts({
+        const storagePricing = await this.pricingClient.getProducts({
             serviceCode: 'AmazonRDS',
             region: this.region,
             filters: [
@@ -40,27 +35,29 @@ module.exports = class LambdaPricing {
         this.monthlyStoragePrice = storagePricing[0] && storagePricing[0].pricePerUnit;
         this.hourlyACUPrice = acuPricing[0] && acuPricing[0].pricePerUnit;
         this.iopsPrice = iopsPricing[0] && iopsPricing[0].pricePerUnit;
+
+        return this;
     }
 
-    calculateForInstance(dimension) {
-        const ACUCost = (dimension.auroraCapacityUnits * this.hourlyACUPrice) / 60
-        const storageCost = (dimension.storedGiBs * this.monthlyStoragePrice) / (10 ** 9) / config.window.MONTHLY / 60;
-        const iopsCost = dimension.ioRequests * this.iopsPrice;
+    calculateForDimension(dimension) {
+        const ACUCost = (dimension.auroraCapacityUnits * this.hourlyACUPrice) / 60; // cost per minute
+        const storageCost = (dimension.storedGiBs * this.monthlyStoragePrice) / (10 ** 9) / config.window.MONTHLY / 60; // cost per minute
+        const iopsCost = dimension.ioRequests * this.iopsPrice / config.metrics.METRIC_WINDOW;
+        const totalCost = ACUCost + storageCost + iopsCost;
+        const costWindowSeconds = differenceInSeconds(dimension.end, dimension.start) / config.metrics.METRIC_WINDOW;
 
         return {
             region: this.region,
-            currency: CURRENCY,
-            resourceId: dimension.cluster.id,
-            totalCost: ACUCost + storageCost + iopsCost,
+            currency: this.currency,
+            resourceId: dimension.resource.id,
+            estimatedMonthlyCharge: RdsPricing.getMonthlyEstimate(totalCost, costWindowSeconds),
+            totalCostWindowSeconds: costWindowSeconds,
+            totalCost,
             breakdown: {
                 storageCharges: storageCost,
                 iopsCharges: iopsCost,
                 ACUCharges: ACUCost,
             },
         };
-    }
-
-    calculate(rdsDimensions) {
-        return rdsDimensions.map(d => this.calculateForInstance(d));
     }
 };

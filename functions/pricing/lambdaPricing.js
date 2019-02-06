@@ -1,7 +1,7 @@
 const config = require('../config');
-const { PRICING } = require('../clients');
+const { differenceInSeconds } = require('date-fns');
+const PricingAbstract = require('./PricingAbstract');
 
-const CURRENCY = 'USD';
 const groups = ['AWS-Lambda-Duration', 'AWS-Lambda-Requests'];
 
 const getComputeUsage = (lambdaDimension) => {
@@ -9,36 +9,34 @@ const getComputeUsage = (lambdaDimension) => {
     return (totalComputeSeconds * lambdaDimension.memory) / 1024;
 };
 
-module.exports = class LambdaPricing {
-    constructor() {
-        this.region = config.regions.CURRENT_REGION;
-    }
-
+module.exports = class LambdaPricing extends PricingAbstract {
     async init() {
-        const pricing = await PRICING.getProducts({
+        const pricing = await this.pricingClient.getProducts({
             serviceCode: 'AWSLambda',
             region: this.region,
         });
         this.pricing = pricing.filter(pr => groups.includes(pr.group));
         this.computePrice = this.pricing.find(p => p.unit === 'Second' || p.unit === 'seconds').pricePerUnit;
         this.requestPrice = this.pricing.find(p => p.unit === 'Requests').pricePerUnit;
+
+        return this;
     }
 
-    calculateForLambda(dimension) {
+    calculateForDimension(dimension) {
         const computeUsage = getComputeUsage(dimension);
-        const computeCharges = computeUsage * this.computePrice;
-        const requestCharges = dimension.requestCount * this.requestPrice;
+        const computeCharges = computeUsage * this.computePrice / config.metrics.METRIC_WINDOW;
+        const requestCharges = dimension.requestCount * this.requestPrice / config.metrics.METRIC_WINDOW;
+        const totalCost = computeCharges + requestCharges;
+        const costWindowSeconds = differenceInSeconds(dimension.end, dimension.start) / config.metrics.METRIC_WINDOW;
 
         return {
             region: this.region,
-            currency: CURRENCY,
-            resourceId: dimension.function.id,
-            totalCost: computeCharges + requestCharges,
+            currency: this.currency,
+            resourceId: dimension.resource.id,
+            estimatedMonthlyCharge: LambdaPricing.getMonthlyEstimate(totalCost, costWindowSeconds),
+            totalCostWindowSeconds: costWindowSeconds,
+            totalCost,
             breakdown: { computeCharges, requestCharges },
         };
-    }
-
-    calculate(lambdaDimensions) {
-        return lambdaDimensions.map(d => this.calculateForLambda(d));
     }
 };

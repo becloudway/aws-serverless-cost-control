@@ -21,7 +21,13 @@ module.exports = class ResourceManager {
 
         this.resources = taggedResources.ResourceTagMappingList.map((res) => {
             const arn = res.ResourceARN;
-            const [,, service, region,, type, resourceId] = arn.split(':');
+            // eslint-disable-next-line prefer-const
+            let [,, service, region,, type, resourceId] = arn.split(':');
+
+            if (service === 'dynamodb') {
+                [type, resourceId] = type.split('/');
+            }
+
             return new Resource({
                 type, resourceId, service, arn, region,
             });
@@ -31,6 +37,7 @@ module.exports = class ResourceManager {
     }
 
     getResources(service, type) {
-        return this.resources.filter(r => r.service === service && r.type === type);
+        const match = new RegExp(`^${type}`);
+        return this.resources.filter(r => r.service === service && match.test(r.type));
     }
 };

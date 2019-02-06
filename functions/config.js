@@ -1,10 +1,10 @@
 const SERVICE_RDS = 'rds';
 const SERVICE_LAMBDA = 'lambda';
-// const SERVICE_DYNAMODB = 'dynamodb';
+const SERVICE_DYNAMODB = 'dynamodb';
 // const SERVICE_KINESIS = 'kinesis';
 const RESOURCE_LAMBDA_FUNCTION = 'function';
 const RESOURCE_RDS_CLUSTER_INSTANCE = 'cluster';
-// const RESOURCE_DDB_TABLE = 'table';
+const RESOURCE_DYNAMODB_TABLE = 'table';
 // const RESOURCE_STREAM = 'stream';
 
 const REGION_MAP_CODE_TO_NAME = {
@@ -29,17 +29,21 @@ const REGION_MAP_CODE_TO_NAME = {
 module.exports = {
     SERVICE_LAMBDA,
     SERVICE_RDS,
+    SERVICE_DYNAMODB,
     RESOURCE_LAMBDA_FUNCTION,
     RESOURCE_RDS_CLUSTER_INSTANCE,
+    RESOURCE_DYNAMODB_TABLE,
     RESOURCE_MAP: [
         `${SERVICE_LAMBDA}:${RESOURCE_LAMBDA_FUNCTION}`,
         `${SERVICE_RDS}:${RESOURCE_RDS_CLUSTER_INSTANCE}`,
+        `${SERVICE_DYNAMODB}:${RESOURCE_DYNAMODB_TABLE}`,
     ],
     metrics: {
-        METRIC_WINDOW: 1,
+        METRIC_WINDOW: 5,
         METRIC_DELAY: 1,
         NAME_SPACE: process.env.METRICS_NAMESPACE, // 'Cloudway/Serverless/PricingForecast',
-        NAME_ESTIMATEDCHARGES: 'EstimatedCharges',
+        NAME_ESTIMATEDCHARGES: 'MonthlyEstimatedCharges',
+        NAME_COST: 'Cost',
         DIMENSIONS: {
             SERVICE_NAME: 'ServiceName',
             RESOURCE_ID: 'RecourceId',

@@ -1,7 +1,9 @@
 const LambdaDimension = require('./lambdaDimension');
 const RdsDimension = require('./rdsDimension');
+const DynamoDBDimension = require('./dynamodbDimension');
 
 module.exports = {
-    LambdaDimension,
-    RdsDimension,
+    lambda: LambdaDimension,
+    rds: RdsDimension,
+    dynamodb: DynamoDBDimension,
 };
