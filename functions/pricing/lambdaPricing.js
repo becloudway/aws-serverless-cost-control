@@ -1,5 +1,5 @@
-const config = require('../config');
 const { differenceInSeconds } = require('date-fns');
+const config = require('../config');
 const PricingAbstract = require('./PricingAbstract');
 
 const groups = ['AWS-Lambda-Duration', 'AWS-Lambda-Requests'];

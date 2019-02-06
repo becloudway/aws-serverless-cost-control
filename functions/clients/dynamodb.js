@@ -44,4 +44,17 @@ module.exports = class Dynamodb {
         if (!statistics.Datapoints || statistics.Datapoints.length === 0) return 0;
         return statistics.Datapoints.reduce((acc, curr) => acc + (curr.Average || 0), 0) / statistics.Datapoints.length;
     }
+
+    async throttle(resource, { readCapacityUnits = 1, writeCapacityUnits = 1 } = {}) {
+        return new Promise((resolve, reject) => this.client.updateTable({
+            BillingMode: 'PROVISIIONED',
+            ProvisionedThroughput: {
+                ReadCapacityUnits: readCapacityUnits,
+                WriteCapacityUnits: writeCapacityUnits,
+            },
+        }, (err, data) => {
+            if (err) reject(err);
+            resolve(data);
+        }));
+    }
 };

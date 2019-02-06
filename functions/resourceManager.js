@@ -40,4 +40,8 @@ module.exports = class ResourceManager {
         const match = new RegExp(`^${type}`);
         return this.resources.filter(r => r.service === service && match.test(r.type));
     }
+
+    getResource(service, resourceId) {
+        return this.resources.find(r => r.service === service && r.resourceId === resourceId);
+    }
 };
