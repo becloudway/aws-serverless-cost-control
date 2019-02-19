@@ -1,5 +1,5 @@
 {
-  "name": "cloudway-sermo",
+  "name": "serverless-cost-control",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -7,6 +7,6 @@
     "invoke:calculator": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function calculator --path tags.json --region=$AWS_REGION",
     "invoke:inhibitor": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function inhibitor --path tags.json --region=$AWS_REGION"
   },
-  "author": "",
+  "author": "samuel.overloop@cloudway.be",
   "license": "ISC"
 }

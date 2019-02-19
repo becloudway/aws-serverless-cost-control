@@ -6,11 +6,6 @@ const pricing = require('./pricing');
 const dimension = require('./dimension');
 const log = require('./logger');
 
-const parseTagFromEvent = ({ tag }) => {
-    if (tag) return { tagKey: tag.key, tagValue: tag.value };
-    throw new Error('No tags specified');
-};
-
 const getTimeRange = () => {
     const end = subMinutes(Date.now(), config.metrics.METRIC_DELAY);
     const start = subMinutes(end, config.metrics.METRIC_WINDOW);
@@ -42,20 +37,19 @@ exports.handler = async (event) => {
     log.info('Received event', event);
 
     try {
-        const { tagKey, tagValue } = parseTagFromEvent(event);
         const { start, end } = getTimeRange();
-        const resourceManager = await new ResourceManager({ tagKey, tagValue }).init();
+        const resourceManager = await new ResourceManager({ tagKey: config.tags.SCC_MONITOR_GROUP, tagValue: 'true' }).init();
 
-        const lambdaCostRecords = []; /* await new CostRecord({
+        const lambdaCostRecords = await new CostRecord({
             serviceName: config.SERVICE_LAMBDA,
             resourceType: config.RESOURCE_LAMBDA_FUNCTION,
             resourceManager,
-        }).fetch(start, end); */
-        const rdsCostRecords = []; /* await new CostRecord({
+        }).fetch(start, end);
+        const rdsCostRecords = await new CostRecord({
             serviceName: config.SERVICE_RDS,
             resourceType: config.RESOURCE_RDS_CLUSTER_INSTANCE,
             resourceManager,
-        }).fetch(start, end); */
+        }).fetch(start, end);
         const dynamoDBCostRecords = await new CostRecord({
             serviceName: config.SERVICE_DYNAMODB,
             resourceType: config.RESOURCE_DYNAMODB_TABLE,
@@ -68,8 +62,6 @@ exports.handler = async (event) => {
                 service: 'lambda',
                 cost: parseFloat(costRecord.totalCost),
                 resourceId: costRecord.resourceId,
-                tagKey,
-                tagValue,
                 timestamp: end,
             })),
             ...lambdaCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
@@ -77,8 +69,6 @@ exports.handler = async (event) => {
                 service: 'lambda',
                 cost: parseFloat(costRecord.estimatedMonthlyCharge),
                 resourceId: costRecord.resourceId,
-                tagKey,
-                tagValue,
                 timestamp: end,
             })),
             ...rdsCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
@@ -86,8 +76,6 @@ exports.handler = async (event) => {
                 service: 'rds',
                 cost: parseFloat(costRecord.totalCost),
                 resourceId: costRecord.resourceId,
-                tagKey,
-                tagValue,
                 timestamp: end,
             })),
             ...rdsCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
@@ -95,8 +83,6 @@ exports.handler = async (event) => {
                 service: 'rds',
                 cost: parseFloat(costRecord.estimatedMonthlyCharge),
                 resourceId: costRecord.resourceId,
-                tagKey,
-                tagValue,
                 timestamp: end,
             })),
             ...dynamoDBCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
@@ -104,8 +90,6 @@ exports.handler = async (event) => {
                 service: 'dynamoDB',
                 cost: parseFloat(costRecord.totalCost),
                 resourceId: costRecord.resourceId,
-                tagKey,
-                tagValue,
                 timestamp: end,
             })),
             ...dynamoDBCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
@@ -113,8 +97,6 @@ exports.handler = async (event) => {
                 service: 'dynamoDB',
                 cost: parseFloat(costRecord.estimatedMonthlyCharge),
                 resourceId: costRecord.resourceId,
-                tagKey,
-                tagValue,
                 timestamp: end,
             })),
         ]);

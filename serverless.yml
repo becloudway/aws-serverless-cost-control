@@ -40,9 +40,7 @@ functions:
           rate: ${self:custom.scheduleRate}
           enabled: true
           input:
-            tag:
-              key: ${env:PRICING_TAG_KEY}
-              value: ${env:PRICING_TAG_VALUE}
+            scc-monitor-group: ${env:SCC_DEFAULT_MONITOR_GROUP}
     environment:
       METRICS_NAMESPACE: ${env:METRICS_NAMESPACE}
   inhibitor:
@@ -56,28 +54,29 @@ functions:
       METRICS_NAMESPACE: ${env:METRICS_NAMESPACE}
 
 # you can add CloudFormation resource templates here
-resources:
-  Resources:
-    LambdaThresholdBreached:
-      Type: AWS::CloudWatch::Alarm
-      Properties:
-        ActionsEnabled: true
-        AlarmActions:
-          - { "Fn::Join" : ["", ["arn:aws:sns:${self:custom.region}:", { "Ref" : "AWS::AccountId" }, ":${self:custom.lambdaAlertTopic}" ] ]  }
-        AlarmName: { "Fn::Join" : ["", ["${self:service}", "-", "lambda-threshold", "-", "${self:custom.stage}" ] ]  }
-        ComparisonOperator: GreaterThanOrEqualToThreshold
-        DatapointsToAlarm: 1
-        Dimensions:
-          - Name: Currency
-            Value: USD
-          - Name: ServiceName
-            Value: lambda
-          - Name: Tag
-            Value: ${env:PRICING_TAG_KEY}=${env:PRICING_TAG_VALUE}
-        EvaluationPeriods: 1
-        MetricName: EstimatedCharges
-        Namespace: ${env:METRICS_NAMESPACE}
-        Period: 300
-        Statistic: Maximum
-        Threshold: 10.0
-        TreatMissingData: missing
+#resources:
+#  Resources:
+#    ResourceGroupThresholdBreached:
+#      Type: AWS::CloudWatch::Alarm
+#      Properties:
+#        ActionsEnabled: true
+#        AlarmActions:
+#          - { "Fn::Join" : ["", ["arn:aws:sns:${self:custom.region}:", { "Ref" : "AWS::AccountId" }, ":${self:custom.lambdaAlertTopic}" ] ]  }
+#        AlarmName: { "Fn::Join" : ["", ["${self:service}", "-", "${env:SCC_DEFAULT_MONITOR_GROUP}", "-alarm" ] ]  }
+#        ComparisonOperator: GreaterThanOrEqualToThreshold
+#        DatapointsToAlarm: 1
+#        EvaluationPeriods: 1
+#        Metrics:
+#          - Id: ${env:SCC_DEFAULT_MONITOR_GROUP}_monthly_estimated_charges
+#            MetricStat:
+#              Metric:
+#                MetricName: MonthlyEstimatedCharges
+#                Namespace: ${env:METRICS_NAMESPACE}
+#                Dimensions:
+#                  - Name: ResourceMonitorGroup
+#                    Value: ${env:SCC_DEFAULT_MONITOR_GROUP}
+#              Period: 60
+#              Stat: Maximum
+#            ReturnData: True
+#        Threshold: ${env:SCC_DEFAULT_ALERT_THRESHOLD}
+#        TreatMissingData: missing

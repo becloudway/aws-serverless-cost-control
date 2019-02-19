@@ -1,11 +1,9 @@
 const SERVICE_RDS = 'rds';
 const SERVICE_LAMBDA = 'lambda';
 const SERVICE_DYNAMODB = 'dynamodb';
-// const SERVICE_KINESIS = 'kinesis';
 const RESOURCE_LAMBDA_FUNCTION = 'function';
 const RESOURCE_RDS_CLUSTER_INSTANCE = 'cluster';
 const RESOURCE_DYNAMODB_TABLE = 'table';
-// const RESOURCE_STREAM = 'stream';
 
 const REGION_MAP_CODE_TO_NAME = {
     'us-east-1': 'US East (N. Virginia)',
@@ -70,7 +68,10 @@ module.exports = {
     regions: {
         NAME: REGION_MAP_CODE_TO_NAME,
         CURRENT_REGION: process.env.AWS_REGION || 'eu-west-1',
-        IRELAND: 'eu-west-1',
         NORTH_VIRGINIA: 'us-east-1',
+    },
+    tags: {
+        SCC_MONITOR_GROUP: 'scc-monitor-group',
+        SCC_ACTIONABLE: 'scc-actionable',
     },
 };

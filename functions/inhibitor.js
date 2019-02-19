@@ -1,19 +1,15 @@
 const ResourceManager = require('./resourceManager');
+const config = require('./config');
 const { LAMBDA, DYNAMODB, RDS } = require('./clients');
 const log = require('./logger');
 
-const parseTagFromEvent = ({ Records }) => {
+const parseDataFromEvent = ({ Records }) => {
     const snsMessage = Records[0] && Records[0].Sns.Message;
     const dimensions = JSON.parse(snsMessage).Trigger.Dimensions;
-    const tag = dimensions.find(d => d.name === 'Tag');
     const serviceName = dimensions.find(d => d.name === 'ServiceName').value;
     const resourceId = dimensions.find(d => d.name === 'ResourceId').value;
 
-    if (!tag) throw new Error('No tags specified');
-    const [tagKey, tagValue] = tag.value.split('=');
     return {
-        tagKey,
-        tagValue,
         resourceId,
         serviceName,
     };
@@ -31,18 +27,17 @@ exports.handler = async (event, context) => {
 
     try {
         const {
-            tagKey,
-            tagValue,
             resourceId,
             serviceName,
-        } = parseTagFromEvent(event);
+        } = parseDataFromEvent(event);
 
-        const resourceManager = await new ResourceManager({ tagKey, tagValue }).init();
+        const resourceManager = await new ResourceManager({ tagKey: config.tags.SCC_ACTIONABLE, tagValue: 'true' }).init();
         const resource = await resourceManager.getResource(serviceName, resourceId);
 
-        await action[serviceName](resource);
-
-        log.info(`Throttled ${serviceName} resource ${resourceId}`);
+        if (resource) {
+            await action[serviceName](resource);
+            log.info(`Throttled ${serviceName} resource ${resourceId}`);
+        }
 
         return { status: 200 };
     } catch (e) {

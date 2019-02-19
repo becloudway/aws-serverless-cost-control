@@ -31,7 +31,7 @@ module.exports = class Cloudwatch {
     }
 
     putMetricData({
-        timestamp, cost, service, resourceId, tagKey, tagValue, metricName,
+        timestamp, cost, service, resourceId, metricName,
     }) {
         return new Promise((resolve, reject) => {
             this.client.putMetricData({
@@ -43,6 +43,10 @@ module.exports = class Cloudwatch {
                     MetricName: metricName,
                     Dimensions: [
                         {
+                            Name: 'id',
+                            Value: `${resourceId}-${service}-${metricName}`,
+                        },
+                        {
                             Name: config.metrics.DIMENSIONS.SERVICE_NAME,
                             Value: service,
                         },
@@ -53,10 +57,6 @@ module.exports = class Cloudwatch {
                         {
                             Name: config.metrics.DIMENSIONS.CURRENCY,
                             Value: config.metrics.DIMENSIONS.CURRENCY_USD,
-                        },
-                        {
-                            Name: config.metrics.DIMENSIONS.TAG,
-                            Value: `${tagKey}=${tagValue}`,
                         },
                     ],
                 }],
