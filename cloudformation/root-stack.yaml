@@ -1,0 +1,11 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: The AWS CFN Template for Cloudway Monitoring Build Bucket
+Resources:
+  ServerlessDeploymentBucket:
+    Type: AWS::S3::Bucket
+Outputs:
+  ServerlessDeploymentBucketName:
+    Value:
+      Ref: ServerlessDeploymentBucket
+

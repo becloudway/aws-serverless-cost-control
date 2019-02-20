@@ -5,8 +5,12 @@
   "main": "index.js",
   "scripts": {
     "invoke:calculator": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function calculator --path tags.json --region=$AWS_REGION",
-    "invoke:inhibitor": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function inhibitor --path tags.json --region=$AWS_REGION"
+    "invoke:inhibitor": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function inhibitor --path tags.json --region=$AWS_REGION",
+    "build": "rm -rf build && mkdir build && cp -r functions build/functions && rm -rf build/functions/node_modules && cd build/functions && npm i --production && zip -qr ../functions.zip node_modules *.js clients dimension pricing && rm -rf functions/"
   },
   "author": "samuel.overloop@cloudway.be",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "calculator": "file:build/functions"
+  }
 }

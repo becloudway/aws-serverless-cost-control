@@ -1,0 +1,150 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: The AWS CFN template Cloudway Monitoring Stack
+
+Parameters:
+  MetricNameSpace:
+    Type: String
+    Default: Cloudway/Serverless/Monitoring
+  Environment:
+    Type: String
+    Default: dev
+  ApplicationName:
+    Type: String
+    Default: cloudway-scc
+
+Mappings:
+  DeploymentPath:
+    Latest:
+      BucketName: "scc-root-stack-serverlessdeploymentbucket-2s7et78s8ity"
+      BucketKey: "latest/functions.zip"
+
+Resources:
+  # ============= LOG GROUPS ============== #
+  CalculatorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ApplicationName}-calculator"
+  InhibitorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ApplicationName}-inhibitor"
+
+  # ============= IAM ============== #
+  IamRoleLambdaExecution:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: !Sub "${Environment}-${ApplicationName}-lambda-policy"
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+              Resource:
+                - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-calculator:*"
+                - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-inhibitor:*"
+            - Effect: Allow
+              Action:
+                - logs:PutLogEvents
+              Resource:
+                - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-calculator:*:*"
+                - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-inhibitor:*:*"
+            - Effect: Allow
+              Action:
+                - cloudwatch:*
+                - lambda:GetFunctionConfiguration
+                - lambda:PutFunctionConcurrency
+                - tag:getResources
+                - tag:getTagKeys
+                - tag:getTagValues
+                - pricing:GetProducts
+                - pricing:DescribeServices
+                - pricing:GetAttributeValues
+            Resource: "*"
+      Path: "/"
+      RoleName: !Sub "{Environment}-${ApplicationName}-lambda-role"
+
+  # ============= LAMBDA ============== #
+  CalculatorLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
+        S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
+      FunctionName: !Sub "${Environment}-${ApplicationName}-calculator"
+      Handler: functions/calculator.handler
+      MemorySize: 1024
+      Role: !GetAtt IamRoleLambdaExecution.Arn
+      Runtime: nodejs8.10
+      Timeout: 300
+      Environment:
+        Variables:
+          METRICS_NAMESPACE: !Ref MetricNameSpace
+    DependsOn:
+      - CalculatorLogGroup
+      - IamRoleLambdaExecution
+
+  InhibitorLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
+        S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
+      FunctionName: !Sub "${Environment}-${ApplicationName}-inhibitor"
+      Handler: functions/inhibitor.handler
+      MemorySize: 1024
+      Role: !GetAtt IamRoleLambdaExecution.Arn
+      Runtime: nodejs8.10
+      Timeout: 300
+      Environment:
+        Variables:
+          METRICS_NAMESPACE: !Ref MetricNameSpace
+    DependsOn:
+    - InhibitorLogGroup
+    - IamRoleLambdaExecution
+
+  # ============= TRIGGERS ============== #
+  CalculatorEventsRuleSchedule:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: rate(1 minute)
+      State: ENABLED
+      Targets:
+      - Input: '{"scc-monitor-group":"scc-monitor-group"}'
+        Arn: !GetAtt CalculatorLambdaFunction.Arn
+        Id: calculatorSchedule
+  CalculatorLambdaPermissionEventsRuleSchedule:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt CalculatorLambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: !Sub "events.${AWS::URLSuffix}"
+      SourceArn: !GetAtt CalculatorEventsRuleSchedule.Arn
+
+  # ============= SNS ============== #
+  SNSTopicSccInhibitor:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${Environment}-${ApplicationName}-topic"
+      DisplayName: ''
+      Subscription:
+        - Endpoint: !GetAtt InhibitorLambdaFunction.Arn
+          Protocol: lambda
+
+  SNSTopicSccInhibitorPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt InhibitorLambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: !Sub "sns.${AWS::URLSuffix}"
+      SourceArn: !Sub "arn:${AWS::Partition}:sns:${AWS::Region}:${AWS::AccountId}:${Environment}-${ApplicationName}-topic"
