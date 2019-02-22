@@ -36,43 +36,43 @@ Resources:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - lambda.amazonaws.com
-          Action:
-          - sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
       Policies:
-      - PolicyName: !Sub "${Environment}-${ApplicationName}-lambda-policy"
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - logs:CreateLogStream
-              Resource:
-                - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-calculator:*"
-                - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-inhibitor:*"
-            - Effect: Allow
-              Action:
-                - logs:PutLogEvents
-              Resource:
-                - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-calculator:*:*"
-                - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-inhibitor:*:*"
-            - Effect: Allow
-              Action:
-                - cloudwatch:*
-                - lambda:GetFunctionConfiguration
-                - lambda:PutFunctionConcurrency
-                - tag:getResources
-                - tag:getTagKeys
-                - tag:getTagValues
-                - pricing:GetProducts
-                - pricing:DescribeServices
-                - pricing:GetAttributeValues
-              Resource: "*"
+        - PolicyName: !Sub "${Environment}-${ApplicationName}-lambda-policy"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-calculator:*"
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-inhibitor:*"
+              - Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-calculator:*:*"
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-inhibitor:*:*"
+              - Effect: Allow
+                Action:
+                  - cloudwatch:*
+                  - lambda:GetFunctionConfiguration
+                  - lambda:PutFunctionConcurrency
+                  - tag:getResources
+                  - tag:getTagKeys
+                  - tag:getTagValues
+                  - pricing:GetProducts
+                  - pricing:DescribeServices
+                  - pricing:GetAttributeValues
+                Resource: "*"
       Path: "/"
-      RoleName: !Sub "{Environment}-${ApplicationName}-lambda-role"
+      RoleName: !Sub "${Environment}-${ApplicationName}-lambda-role"
 
   # ============= LAMBDA ============== #
   CalculatorLambdaFunction:
