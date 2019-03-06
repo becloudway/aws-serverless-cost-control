@@ -1,5 +1,6 @@
-const log = require('log4js').getLogger();
+// const log = require('log4js').getLogger();
 
-log.level = 'debug';
+const log = console;
+// log.level = 'debug';
 
 module.exports = log;

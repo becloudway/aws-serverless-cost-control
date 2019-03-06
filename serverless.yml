@@ -31,7 +31,7 @@ package:
 
 functions:
   calculator:
-    handler: functions/calculator.handler
+    handler: calculator.handler
     name: ${self:service}-calculator
     timeout: 300
     memory: 512
@@ -44,7 +44,7 @@ functions:
     environment:
       METRICS_NAMESPACE: ${env:METRICS_NAMESPACE}
   inhibitor:
-    handler: functions/inhibitor.handler
+    handler: inhibitor.handler
     name: ${self:service}-inhibitor
     timeout: 300
     memory: 512
