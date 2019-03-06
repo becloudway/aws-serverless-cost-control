@@ -20,14 +20,14 @@ Mappings:
 
 Resources:
   # ============= LOG GROUPS ============== #
-  CalculatorLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${ApplicationName}-calculator"
-  InhibitorLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${ApplicationName}-inhibitor"
+#  CalculatorLogGroup:
+#    Type: AWS::Logs::LogGroup
+#    Properties:
+#      LogGroupName: !Sub "/aws/lambda/${ApplicationName}-calculator"
+#  InhibitorLogGroup:
+#    Type: AWS::Logs::LogGroup
+#    Properties:
+#      LogGroupName: !Sub "/aws/lambda/${ApplicationName}-inhibitor"
 
   # ============= IAM ============== #
   IamRoleLambdaExecution:
@@ -82,7 +82,7 @@ Resources:
         S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
         S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
       FunctionName: !Sub "${Environment}-${ApplicationName}-calculator"
-      Handler: functions/calculator.handler
+      Handler: calculator.handler
       MemorySize: 1024
       Role: !GetAtt IamRoleLambdaExecution.Arn
       Runtime: nodejs8.10
@@ -101,7 +101,7 @@ Resources:
         S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
         S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
       FunctionName: !Sub "${Environment}-${ApplicationName}-inhibitor"
-      Handler: functions/inhibitor.handler
+      Handler: inhibitor.handler
       MemorySize: 1024
       Role: !GetAtt IamRoleLambdaExecution.Arn
       Runtime: nodejs8.10
