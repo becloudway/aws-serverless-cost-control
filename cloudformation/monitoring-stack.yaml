@@ -91,7 +91,7 @@ Resources:
         Variables:
           METRICS_NAMESPACE: !Ref MetricNameSpace
     DependsOn:
-      - CalculatorLogGroup
+#      - CalculatorLogGroup
       - IamRoleLambdaExecution
 
   InhibitorLambdaFunction:
@@ -110,7 +110,7 @@ Resources:
         Variables:
           METRICS_NAMESPACE: !Ref MetricNameSpace
     DependsOn:
-    - InhibitorLogGroup
+#    - InhibitorLogGroup
     - IamRoleLambdaExecution
 
   # ============= TRIGGERS ============== #
