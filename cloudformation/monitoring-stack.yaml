@@ -19,16 +19,6 @@ Mappings:
       BucketKey: "latest/functions.zip"
 
 Resources:
-  # ============= LOG GROUPS ============== #
-#  CalculatorLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub "/aws/lambda/${ApplicationName}-calculator"
-#  InhibitorLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub "/aws/lambda/${ApplicationName}-inhibitor"
-
   # ============= IAM ============== #
   IamRoleLambdaExecution:
     Type: AWS::IAM::Role
@@ -42,6 +32,8 @@ Resources:
                 - lambda.amazonaws.com
             Action:
               - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
         - PolicyName: !Sub "${Environment}-${ApplicationName}-lambda-policy"
           PolicyDocument:
@@ -49,19 +41,6 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - logs:CreateLogStream
-                Resource:
-                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-calculator:*"
-                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-inhibitor:*"
-              - Effect: Allow
-                Action:
-                  - logs:PutLogEvents
-                Resource:
-                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-calculator:*:*"
-                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ApplicationName}-inhibitor:*:*"
-              - Effect: Allow
-                Action:
-                  - cloudwatch:*
                   - lambda:GetFunctionConfiguration
                   - lambda:PutFunctionConcurrency
                   - tag:getResources
@@ -91,7 +70,6 @@ Resources:
         Variables:
           METRICS_NAMESPACE: !Ref MetricNameSpace
     DependsOn:
-#      - CalculatorLogGroup
       - IamRoleLambdaExecution
 
   InhibitorLambdaFunction:
@@ -110,7 +88,6 @@ Resources:
         Variables:
           METRICS_NAMESPACE: !Ref MetricNameSpace
     DependsOn:
-#    - InhibitorLogGroup
     - IamRoleLambdaExecution
 
   # ============= TRIGGERS ============== #
