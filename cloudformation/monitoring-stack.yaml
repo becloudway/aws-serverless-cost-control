@@ -41,6 +41,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  - cloudwatch:*
                   - lambda:GetFunctionConfiguration
                   - lambda:PutFunctionConcurrency
                   - tag:getResources
