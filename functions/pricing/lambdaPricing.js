@@ -30,9 +30,9 @@ module.exports = class LambdaPricing extends PricingAbstract {
         const costWindowSeconds = differenceInSeconds(dimension.end, dimension.start) / config.metrics.METRIC_WINDOW;
 
         return {
-            region: this.region,
+            // region: this.region,
             currency: this.currency,
-            resourceId: dimension.resource.id,
+            // resourceId: dimension.resource.id,
             estimatedMonthlyCharge: LambdaPricing.getMonthlyEstimate(totalCost, costWindowSeconds),
             totalCostWindowSeconds: costWindowSeconds,
             totalCost,

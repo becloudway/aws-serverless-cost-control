@@ -1,7 +1,7 @@
 const { subMinutes } = require('date-fns');
 const ResourceManager = require('./resourceManager');
 const config = require('./config');
-const { CLOUDWATCH } = require('./clients');
+const { CLOUDWATCH, SNS } = require('./clients');
 const pricing = require('./pricing');
 const dimension = require('./dimension');
 const log = require('./logger');
@@ -13,23 +13,20 @@ const getTimeRange = () => {
 };
 
 class CostRecord {
-    constructor({ serviceName, resourceType, resourceManager }) {
-        this.serviceName = serviceName;
-        this.resourceType = resourceType;
-        this.resourceManager = resourceManager;
-        this.Pricing = pricing[this.serviceName];
-        this.Dimension = dimension[this.serviceName];
+    constructor(resource) {
+        this.resource = resource;
+        this.Pricing = pricing[resource.service];
+        this.Dimension = dimension[resource.service];
     }
 
     async fetch(start, end) {
-        const resources = await this.resourceManager.getResources(this.serviceName, this.resourceType);
-        const dimensions = await Promise.all(resources.map(resource => new this.Dimension({ start, end, resource }).create()));
+        const costDimension = await new this.Dimension({ start, end, resource: this.resource }).create();
         const pricingScheme = await new this.Pricing().init();
-        const costRecords = pricingScheme.calculate(dimensions);
+        const costRecord = pricingScheme.calculateForDimension(costDimension);
 
-        log.info(`Cost records for ${this.serviceName.toUpperCase()}`, costRecords);
+        log.info(`Cost record for ${this.resource.service.toUpperCase()}`, costRecord);
 
-        return costRecords;
+        return { ...this, ...costRecord };
     }
 }
 
@@ -38,68 +35,44 @@ exports.handler = async (event) => {
 
     try {
         const { start, end } = getTimeRange();
+
+        // RESOURCES
         const resourceManager = await new ResourceManager({ tagKey: config.tags.SCC_MONITOR_GROUP, tagValue: 'true' }).init();
+        const resources = [].concat(...(await Promise.all([
+            resourceManager.getResources(config.SERVICE_LAMBDA, config.RESOURCE_LAMBDA_FUNCTION),
+            resourceManager.getResources(config.SERVICE_RDS, config.RESOURCE_RDS_CLUSTER_INSTANCE),
+            resourceManager.getResources(config.SERVICE_DYNAMODB, config.RESOURCE_DYNAMODB_TABLE),
+        ])));
+        const costRecords = await Promise.all(resources.map(resource => new CostRecord(resource).fetch(start, end)));
 
-        const lambdaCostRecords = await new CostRecord({
-            serviceName: config.SERVICE_LAMBDA,
-            resourceType: config.RESOURCE_LAMBDA_FUNCTION,
-            resourceManager,
-        }).fetch(start, end);
-        const rdsCostRecords = await new CostRecord({
-            serviceName: config.SERVICE_RDS,
-            resourceType: config.RESOURCE_RDS_CLUSTER_INSTANCE,
-            resourceManager,
-        }).fetch(start, end);
-        const dynamoDBCostRecords = await new CostRecord({
-            serviceName: config.SERVICE_DYNAMODB,
-            resourceType: config.RESOURCE_DYNAMODB_TABLE,
-            resourceManager,
-        }).fetch(start, end);
+        // TRIGGER ACTIONS IF NEEDED
+        const actionableResources = costRecords
+            .filter(cr => cr.resource.actionable)
+            .filter(cr => cr.estimatedMonthlyCharge >= cr.resource.costLimit)
+            .map(cr => cr.resource);
 
-        await Promise.all([
-            ...lambdaCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
-                metricName: config.metrics.NAME_COST,
-                service: 'lambda',
-                cost: parseFloat(costRecord.totalCost),
-                resourceId: costRecord.resourceId,
-                timestamp: end,
-            })),
-            ...lambdaCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
-                metricName: config.metrics.NAME_ESTIMATEDCHARGES,
-                service: 'lambda',
-                cost: parseFloat(costRecord.estimatedMonthlyCharge),
-                resourceId: costRecord.resourceId,
-                timestamp: end,
-            })),
-            ...rdsCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
-                metricName: config.metrics.NAME_COST,
-                service: 'rds',
-                cost: parseFloat(costRecord.totalCost),
-                resourceId: costRecord.resourceId,
-                timestamp: end,
-            })),
-            ...rdsCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
-                metricName: config.metrics.NAME_ESTIMATEDCHARGES,
-                service: 'rds',
-                cost: parseFloat(costRecord.estimatedMonthlyCharge),
-                resourceId: costRecord.resourceId,
-                timestamp: end,
-            })),
-            ...dynamoDBCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
-                metricName: config.metrics.NAME_COST,
-                service: 'dynamoDB',
-                cost: parseFloat(costRecord.totalCost),
-                resourceId: costRecord.resourceId,
-                timestamp: end,
-            })),
-            ...dynamoDBCostRecords.map(costRecord => CLOUDWATCH.putMetricData({
-                metricName: config.metrics.NAME_ESTIMATEDCHARGES,
-                service: 'dynamoDB',
-                cost: parseFloat(costRecord.estimatedMonthlyCharge),
-                resourceId: costRecord.resourceId,
-                timestamp: end,
-            })),
-        ]);
+        await Promise.all(actionableResources.map(r => SNS.publish({
+            topicArn: process.env.ACTIONABLE_TOPIC_ARN,
+            resource: r,
+        })));
+
+        // CREATE COST METRICS
+        await Promise.all(costRecords.map(costRecord => CLOUDWATCH.putMetricData({
+            metricName: config.metrics.NAME_COST,
+            service: costRecord.resource.service,
+            cost: parseFloat(costRecord.totalCost),
+            resourceId: costRecord.resource.id,
+            timestamp: end,
+        })));
+
+        // CREATE ESTIMATED CHARGES METRICS
+        await Promise.all(costRecords.map(costRecord => CLOUDWATCH.putMetricData({
+            metricName: config.metrics.NAME_ESTIMATEDCHARGES,
+            service: costRecord.resource.service,
+            cost: parseFloat(costRecord.estimatedMonthlyCharge),
+            resourceId: costRecord.resource.id,
+            timestamp: end,
+        })));
 
         return { status: 200 };
     } catch (e) {

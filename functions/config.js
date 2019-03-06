@@ -39,7 +39,7 @@ module.exports = {
     metrics: {
         METRIC_WINDOW: 5,
         METRIC_DELAY: 1,
-        NAME_SPACE: process.env.METRICS_NAMESPACE, // 'Cloudway/Serverless/PricingForecast',
+        NAME_SPACE: process.env.METRICS_NAMESPACE || 'Cloudway/Serverless/PricingForecast',
         NAME_ESTIMATEDCHARGES: 'MonthlyEstimatedCharges',
         NAME_COST: 'Cost',
         DIMENSIONS: {
@@ -73,5 +73,6 @@ module.exports = {
     tags: {
         SCC_MONITOR_GROUP: 'scc-monitor-group',
         SCC_ACTIONABLE: 'scc-actionable',
+        SCC_COST_LIMIT: 'scc-cost-limit',
     },
 };

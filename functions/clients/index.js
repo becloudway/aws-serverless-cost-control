@@ -6,6 +6,7 @@ const Cloudwatch = require('./cloudwatch');
 const Pricing = require('./pricing');
 const Rds = require('./rds');
 const DynamoDB = require('./dynamodb');
+const SNS = require('./sns');
 
 
 const { CURRENT_REGION: REGION, NORTH_VIRGINIA } = config.regions;
@@ -14,7 +15,8 @@ const tagClient = new Tag(new AWS.ResourceGroupsTaggingAPI({ apiVersion: '2017-0
 const pricingClient = new Pricing(new AWS.Pricing({ apiVersion: '2017-10-15', region: NORTH_VIRGINIA }));
 const lambdaClient = new Lambda(new AWS.Lambda({ apiVersion: '2015-03-31', region: REGION }), cloudwatchClient);
 const rdsClient = new Rds(new AWS.RDS({ apiVersion: '2014-10-31', region: REGION }), cloudwatchClient);
-const dynamodbClient = new DynamoDB(new AWS.DynamoDB({ apiVersion: '2012-08-10' }), cloudwatchClient);
+const dynamodbClient = new DynamoDB(new AWS.DynamoDB({ apiVersion: '2012-08-10', region: REGION }), cloudwatchClient);
+const snsClient = new SNS(new AWS.SNS({ apiVersion: '2010-03-31', region: REGION }));
 
 module.exports = {
     CLOUDWATCH: cloudwatchClient,
@@ -23,4 +25,5 @@ module.exports = {
     PRICING: pricingClient,
     RDS: rdsClient,
     DYNAMODB: dynamodbClient,
+    SNS: snsClient,
 };

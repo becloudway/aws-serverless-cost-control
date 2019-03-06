@@ -47,9 +47,9 @@ module.exports = class RdsPricing extends PricingAbstract {
         const costWindowSeconds = differenceInSeconds(dimension.end, dimension.start) / config.metrics.METRIC_WINDOW;
 
         return {
-            region: this.region,
+            // region: this.region,
             currency: this.currency,
-            resourceId: dimension.resource.id,
+            // resourceId: dimension.resource.id,
             estimatedMonthlyCharge: RdsPricing.getMonthlyEstimate(totalCost, costWindowSeconds),
             totalCostWindowSeconds: costWindowSeconds,
             totalCost,

@@ -11,6 +11,9 @@ Parameters:
   ApplicationName:
     Type: String
     Default: cloudway-scc
+  MonitorEmail:
+    Type: String
+    Description: This email will be used for monitoring notifications
 
 Mappings:
   DeploymentPath:
@@ -44,6 +47,7 @@ Resources:
                   - cloudwatch:*
                   - lambda:GetFunctionConfiguration
                   - lambda:PutFunctionConcurrency
+                  - dynamodb:DescribeTable
                   - tag:getResources
                   - tag:getTagKeys
                   - tag:getTagValues
@@ -70,6 +74,7 @@ Resources:
       Environment:
         Variables:
           METRICS_NAMESPACE: !Ref MetricNameSpace
+          ACTIONABLE_TOPIC_ARN: !Ref SNSTopicSccInhibitor
     DependsOn:
       - IamRoleLambdaExecution
 
@@ -118,6 +123,8 @@ Resources:
       Subscription:
         - Endpoint: !GetAtt InhibitorLambdaFunction.Arn
           Protocol: lambda
+        - Endpoint: !Ref MonitorEmail
+          Protocol: email
 
   SNSTopicSccInhibitorPermission:
     Type: AWS::Lambda::Permission
