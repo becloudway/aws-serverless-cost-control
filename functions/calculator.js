@@ -51,6 +51,8 @@ exports.handler = async (event) => {
             .filter(cr => cr.estimatedMonthlyCharge >= cr.resource.costLimit)
             .map(cr => cr.resource);
 
+        log.info('Actionable resources: ', actionableResources);
+
         await Promise.all(actionableResources.map(r => SNS.publish({
             topicArn: process.env.ACTIONABLE_TOPIC_ARN,
             resource: r,
