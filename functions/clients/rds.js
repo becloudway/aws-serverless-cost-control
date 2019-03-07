@@ -49,9 +49,9 @@ module.exports = class Rds {
         return ioRequestsMetric.Datapoints.reduce((acc, curr) => acc + (curr.Average || 0), 0) / ioRequestsMetric.Datapoints.length;
     }
 
-    async throttle(resource, { minCapacity = 2, maxCapacity = 2, autoPause = true }) {
+    async throttle(resourceId, { minCapacity = 2, maxCapacity = 2, autoPause = true }) {
         return new Promise((resolve, reject) => this.client.modifyDBCluster({
-            DBClusterIdentifier: resource.id,
+            DBClusterIdentifier: resourceId,
             ApplyImmediately: true,
             ScalingConfiguration: {
                 AutoPause: autoPause,

@@ -11,9 +11,9 @@ const parseActionablesFromEvent = ({ Records }) => Records.map((record) => {
 });
 
 const action = {
-    lambda: resource => LAMBDA.throttle(resource, 0),
-    rds: () => resource => RDS.throttle(resource, { maxCapacity: 2, minCapacity: 2, autoPause: true }),
-    dynamodb: resource => DYNAMODB.throttle(resource, { readCapacityUnits: 1, writeCapacityUnits: 1 }),
+    lambda: resourceId => LAMBDA.throttle(resourceId, 0),
+    rds: () => resourceId => RDS.throttle(resourceId, { maxCapacity: 2, minCapacity: 2, autoPause: true }),
+    dynamodb: resourceId => DYNAMODB.throttle(resourceId, { readCapacityUnits: 1, writeCapacityUnits: 1 }),
 };
 
 exports.handler = async (event, context) => {
@@ -22,8 +22,9 @@ exports.handler = async (event, context) => {
 
     try {
         await Promise.all(parseActionablesFromEvent(event).map(async (actionable) => {
+            log.info(`Throttling ${actionable.serviceName} resource ${actionable.resourceId}`);
             await action[actionable.serviceName](actionable.resourceId);
-            log.info(`Throttled ${actionable.serviceName} resource ${actionable.resourceId}`);
+            log.info(`${actionable.resourceId} throttled.`);
         }));
 
         return { status: 200 };

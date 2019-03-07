@@ -54,6 +54,7 @@ Resources:
                   - pricing:GetProducts
                   - pricing:DescribeServices
                   - pricing:GetAttributeValues
+                  - SNS:Publish
                 Resource: "*"
       Path: "/"
       RoleName: !Sub "${Environment}-${ApplicationName}-lambda-role"

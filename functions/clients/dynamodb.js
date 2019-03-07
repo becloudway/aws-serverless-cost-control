@@ -45,9 +45,9 @@ module.exports = class Dynamodb {
         return statistics.Datapoints.reduce((acc, curr) => acc + (curr.Average || 0), 0) / statistics.Datapoints.length;
     }
 
-    async throttle(resource, { readCapacityUnits = 1, writeCapacityUnits = 1 } = {}) {
+    async throttle(resourceId, { readCapacityUnits = 1, writeCapacityUnits = 1 } = {}) {
         return new Promise((resolve, reject) => this.client.updateTable({
-            TableName: resource.id,
+            TableName: resourceId,
             BillingMode: 'PROVISIIONED',
             ProvisionedThroughput: {
                 ReadCapacityUnits: readCapacityUnits,

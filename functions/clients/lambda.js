@@ -6,9 +6,9 @@ module.exports = class Lambda {
         this.clwClient = clwClient;
     }
 
-    throttle(resource, allowedConcurrentExecutions = 1) {
+    throttle(resourceId, allowedConcurrentExecutions = 1) {
         return new Promise((resolve, reject) => this.client.putFunctionConcurrency({
-            FunctionName: resource.id,
+            FunctionName: resourceId,
             ReservedConcurrentExecutions: allowedConcurrentExecutions,
         }, (err) => {
             if (err) reject(err);
