@@ -44,7 +44,7 @@ module.exports = {
         NAME_COST: 'Cost',
         DIMENSIONS: {
             SERVICE_NAME: 'ServiceName',
-            RESOURCE_ID: 'RecourceId',
+            RESOURCE_ID: 'ResourceId',
             WINDOW: 'window',
             CURRENCY: 'Currency',
             TAG: 'Tag',

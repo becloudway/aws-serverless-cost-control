@@ -43,10 +43,6 @@ module.exports = class Cloudwatch {
                     MetricName: metricName,
                     Dimensions: [
                         {
-                            Name: 'id',
-                            Value: `${resourceId}-${service}-${metricName}`,
-                        },
-                        {
                             Name: config.metrics.DIMENSIONS.SERVICE_NAME,
                             Value: service,
                         },
