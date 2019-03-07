@@ -7,16 +7,15 @@ module.exports = class SNS {
         const params = {
             Subject: `We are throttling your AWS resource ${resource.id}`,
             Message: `One of your AWS resources seems to show a lot of activity and has exceeded its hard limit. <br><br>${JSON.stringify(resource)}`,
-            MessageStructure: 'json',
             TopicArn: topicArn,
             MessageAttributes: {
                 resourceId: {
                     DataType: 'String',
                     StringValue: resource.id,
                 },
-                costLimit: {
-                    DataType: 'Number',
-                    StringValue: resource.costLimit,
+                serviceName: {
+                    DataType: 'String',
+                    StringValue: resource.service,
                 },
             },
         };
