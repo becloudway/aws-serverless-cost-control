@@ -1,5 +1,8 @@
-const log = require('log4js').getLogger();
+const bunyan = require('bunyan');
 
-log.level = 'debug';
+const log = bunyan.createLogger({
+    name: 'scc',
+    level: 'debug',
+});
 
 module.exports = log;
