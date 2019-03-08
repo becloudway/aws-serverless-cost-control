@@ -6,7 +6,8 @@
   "scripts": {
     "invoke:calculator": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function calculator --path tags.json --region=$AWS_REGION",
     "invoke:inhibitor": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function inhibitor --path tags.json --region=$AWS_REGION",
-    "build": "rm -rf build lib && mkdir build lib && npm i && tsc && cp -r src package.json package-lock.json build/functions && cd build/functions && npm i --production && zip -qr ../functions.zip node_modules *.js clients dimension pricing && rm -rf functions/",
+    "build": "rm -rf lib && mkdir lib && npm i && tsc",
+    "package": "rm -rf build && mkdir build && cp -r lib package.json package-lock.json build && cd build && npm i --production && zip -qr functions.zip node_modules lib",
     "test": "jest"
   },
   "author": "samuel.overloop@cloudway.be",

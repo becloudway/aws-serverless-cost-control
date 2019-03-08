@@ -61,13 +61,13 @@ Resources:
 
   # ============= LAMBDA ============== #
   CalculatorLambdaFunction:
-    Type: AWS::LambdaClient::Function
+    Type: AWS::Lambda::Function
     Properties:
       Code:
         S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
         S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
       FunctionName: !Sub "${Environment}-${ApplicationName}-calculator"
-      Handler: calculator.handler
+      Handler: lib.calculator.handler
       MemorySize: 1024
       Role: !GetAtt IamRoleLambdaExecution.Arn
       Runtime: nodejs8.10
@@ -80,13 +80,13 @@ Resources:
       - IamRoleLambdaExecution
 
   InhibitorLambdaFunction:
-    Type: AWS::LambdaClient::Function
+    Type: AWS::Lambda::Function
     Properties:
       Code:
         S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
         S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
       FunctionName: !Sub "${Environment}-${ApplicationName}-inhibitor"
-      Handler: inhibitor.handler
+      Handler: lib.inhibitor.handler
       MemorySize: 1024
       Role: !GetAtt IamRoleLambdaExecution.Arn
       Runtime: nodejs8.10
