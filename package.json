@@ -6,11 +6,27 @@
   "scripts": {
     "invoke:calculator": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function calculator --path tags.json --region=$AWS_REGION",
     "invoke:inhibitor": "PRICING_TAG_KEY=name PRICING_TAG_VALUE=sermo serverless invoke local --function inhibitor --path tags.json --region=$AWS_REGION",
-    "build": "rm -rf build && mkdir build && cp -r functions build/functions && rm -rf build/functions/node_modules && cd build/functions && npm i --production && zip -qr ../functions.zip node_modules *.js clients dimension pricing && rm -rf functions/"
+    "build": "rm -rf build && mkdir build && cp -r functions build/functions && rm -rf build/functions/node_modules && cd build/functions && npm i --production && zip -qr ../functions.zip node_modules *.js clients dimension pricing && rm -rf functions/",
+    "test": "jest"
   },
   "author": "samuel.overloop@cloudway.be",
   "license": "ISC",
   "dependencies": {
-    "calculator": "file:build/functions"
+    "aws-lambda": "^0.1.2",
+    "aws-sdk": "^2.394.0",
+    "bunyan": "^1.8.12",
+    "date-fns": "^1.30.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.21",
+    "@types/bunyan": "^1.8.5",
+    "@typescript-eslint/eslint-plugin": "^1.4.2",
+    "@typescript-eslint/parser": "^1.4.2",
+    "eslint": "^5.12.1",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.15.0",
+    "eslint-plugin-typescript": "^0.14.0",
+    "jest": "^24.0.0",
+    "typescript": "^3.3.3333"
   }
 }

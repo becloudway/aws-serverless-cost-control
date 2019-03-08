@@ -61,7 +61,7 @@ Resources:
 
   # ============= LAMBDA ============== #
   CalculatorLambdaFunction:
-    Type: AWS::Lambda::Function
+    Type: AWS::LambdaClient::Function
     Properties:
       Code:
         S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
@@ -80,7 +80,7 @@ Resources:
       - IamRoleLambdaExecution
 
   InhibitorLambdaFunction:
-    Type: AWS::Lambda::Function
+    Type: AWS::LambdaClient::Function
     Properties:
       Code:
         S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]

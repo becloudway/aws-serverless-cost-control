@@ -1,0 +1,1 @@
+{"version":3,"file":"AWSClient.js","sourceRoot":"","sources":["../../src/clients/AWSClient.ts"],"names":[],"mappings":";;AAEA,MAAsB,SAAS;IAK3B,YAAmB,MAAW,EAAE,SAA4B;QACxD,IAAI,CAAC,MAAM,GAAG,MAAM,CAAC;QACrB,IAAI,CAAC,SAAS,GAAG,SAAS,CAAC;IAC/B,CAAC;CACJ;AATD,8BASC"}
