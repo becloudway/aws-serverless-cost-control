@@ -1,5 +1,5 @@
-const calculator = require('../calculator');
+const { calculator } = require('../index');
 
 test('do stuff', async () => {
-    await calculator.handler({});
+    await calculator({});
 });

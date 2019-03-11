@@ -67,7 +67,7 @@ Resources:
         S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
         S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
       FunctionName: !Sub "${Environment}-${ApplicationName}-calculator"
-      Handler: lib.calculator.handler
+      Handler: index.calculator
       MemorySize: 1024
       Role: !GetAtt IamRoleLambdaExecution.Arn
       Runtime: nodejs8.10
@@ -86,7 +86,7 @@ Resources:
         S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
         S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
       FunctionName: !Sub "${Environment}-${ApplicationName}-inhibitor"
-      Handler: lib.inhibitor.handler
+      Handler: index.inhibitor
       MemorySize: 1024
       Role: !GetAtt IamRoleLambdaExecution.Arn
       Runtime: nodejs8.10

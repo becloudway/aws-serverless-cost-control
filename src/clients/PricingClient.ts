@@ -51,11 +51,12 @@ export class PricingClient extends AWSClient {
             const priceDimension = Object.keys(priceDimensions)
                 .map(key => priceDimensions[key])
                 .find(pd => pd.endRange === 'Inf');
+            const pricePerUnit = priceDimension.pricePerUnit.USD || 0;
 
             return {
                 version: pricelist.version,
                 group: pricelist.product.attributes.group,
-                pricePerUnit: priceDimension.pricePerUnit.USD,
+                pricePerUnit: parseFloat(pricePerUnit),
                 unit: priceDimension.unit,
             };
         });

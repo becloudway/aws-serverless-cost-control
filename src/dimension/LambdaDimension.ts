@@ -30,16 +30,28 @@ export class LambdaDimension extends Dimension {
         return this;
     }
 
-    public get requestCount(): number {
-        return this._requestCount;
+    public set averageDuration(value: number) {
+        this._averageDuration = value;
     }
 
     public get averageDuration(): number {
         return this._averageDuration;
     }
 
+    public set memory(value: number) {
+        this._memory = value;
+    }
+
     public get memory(): number {
         return this._memory;
+    }
+
+    public set requestCount(value: number) {
+        this._requestCount = value;
+    }
+
+    public get requestCount(): number {
+        return this._requestCount;
     }
 
     public get dataTransferOutInternetGb(): number {
