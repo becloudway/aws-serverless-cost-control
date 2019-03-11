@@ -18,7 +18,7 @@ actions.set(SERVICE_DYNAMODB, resourceId => dynamodbClient.throttle(resourceId, 
 actions.set(SERVICE_RDS, resourceId => rdsClient.throttle(resourceId, { maxCapacity: 2, minCapacity: 2, autoPause: true }));
 actions.set(SERVICE_LAMBDA, resourceId => lambdaClient.throttle(resourceId, 0));
 
-exports.handler = async (event: SNSEvent) => {
+export const handler = async (event: SNSEvent) => {
     log.info('Received event', JSON.stringify(event, null, 2));
 
     try {

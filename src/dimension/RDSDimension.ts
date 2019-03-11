@@ -1,6 +1,6 @@
+import { start } from 'repl';
 import { Dimension } from './Dimension';
 import { rdsClient } from '../clients';
-import {start} from "repl";
 
 export class RDSDimension extends Dimension {
     private _auroraCapacityUnits: number = 0;

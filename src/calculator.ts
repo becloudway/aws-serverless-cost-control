@@ -12,7 +12,7 @@ const getTimeRange = (): DateRange => {
     return { start, end };
 };
 
-exports.handler = async () => {
+export const handler = async () => {
     try {
         const dateRange = getTimeRange();
         const resourceTag: ResourceTag = {

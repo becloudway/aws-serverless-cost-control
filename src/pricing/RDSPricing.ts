@@ -1,4 +1,4 @@
-import { differenceInSeconds } from 'date-fns';
+import {differenceInMinutes, differenceInSeconds} from 'date-fns';
 import { Pricing } from './Pricing';
 import { RDSDimension } from '../dimension';
 import { metrics, window } from '../config';
@@ -48,11 +48,14 @@ export class RDSPricing extends Pricing {
     }
 
     public calculateForDimension(dimension: RDSDimension): PricingResult {
+        // by default, cost window is one minute and metric window 5 minutes
+        const metricWindowMinutes = differenceInMinutes(dimension.end, dimension.start);
+        const costWindowSeconds = differenceInSeconds(dimension.end, dimension.start) / metricWindowMinutes;
+
         const ACUCost = (dimension.auroraCapacityUnits * this.hourlyACUPrice) / 60; // cost per minute
         const storageCost = (dimension.storedGiBs * this.monthlyStoragePrice) / (10 ** 9) / window.MONTHLY / 60; // cost per minute
-        const iopsCost = dimension.ioRequests * this.iopsPrice / metrics.METRIC_WINDOW;
+        const iopsCost = dimension.ioRequests * this.iopsPrice / metricWindowMinutes;
         const totalCost = ACUCost + storageCost + iopsCost;
-        const costWindowSeconds = differenceInSeconds(dimension.end, dimension.start) / metrics.METRIC_WINDOW;
 
         return {
             currency: this.currency,

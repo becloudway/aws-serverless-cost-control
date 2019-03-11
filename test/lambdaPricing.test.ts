@@ -11,13 +11,13 @@ const ONE_MILLION = 1000 * 1000;
 const pricing: ProductPricing[] = [
     {
         version: '20181212011734',
-        group: 'AWS-LambdaClient-Requests',
+        group: 'AWS-Lambda-Requests',
         pricePerUnit: 0.0000002,
         unit: 'Requests',
     },
     {
         version: '20181212011734',
-        group: 'AWS-LambdaClient-Duration',
+        group: 'AWS-Lambda-Duration',
         pricePerUnit: 0.0000166667,
         unit: 'Second',
     },

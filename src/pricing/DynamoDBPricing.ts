@@ -1,4 +1,4 @@
-import { differenceInSeconds } from 'date-fns';
+import {differenceInMinutes, differenceInSeconds} from 'date-fns';
 import { Pricing } from './Pricing';
 import { metrics, window } from '../config';
 import { DynamoDBDimension } from '../dimension';
@@ -41,11 +41,14 @@ export class DynamoDBPricing extends Pricing {
     }
 
     public calculateForDimension(dimension: DynamoDBDimension): PricingResult {
-        const writeCostPerMinute = dimension.writeCapacityUnits * (this.writeRequestsPrice / this.requestsPerReadWriteUnit) / metrics.METRIC_WINDOW;
-        const readCostPerMinute = dimension.readCapacityUnits * (this.readRequestsPrice / this.requestsPerReadWriteUnit) / metrics.METRIC_WINDOW;
-        const storageCost = (dimension.storageSizeBytes / (10 ** 9)) * this.monthlyStoragePrice / window.MONTHLY / 60;
+        // by default, cost window is one minute and metric window 5 minutes
+        const metricWindowMinutes = differenceInMinutes(dimension.end, dimension.start);
+        const costWindowSeconds = differenceInSeconds(dimension.end, dimension.start) / metricWindowMinutes;
+
+        const writeCostPerMinute = dimension.writeCapacityUnits * (this.writeRequestsPrice / this.requestsPerReadWriteUnit) / metricWindowMinutes;
+        const readCostPerMinute = dimension.readCapacityUnits * (this.readRequestsPrice / this.requestsPerReadWriteUnit) / metricWindowMinutes;
+        const storageCost = (dimension.storageSizeBytes / (10 ** 9)) * this.monthlyStoragePrice / metricWindowMinutes / 60;
         const totalCost = writeCostPerMinute + readCostPerMinute + storageCost;
-        const costWindowSeconds = differenceInSeconds(dimension.end, dimension.start) / metrics.METRIC_WINDOW;
 
         return {
             currency: this.currency,

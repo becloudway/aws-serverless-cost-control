@@ -1,10 +1,10 @@
-import {differenceInMinutes, differenceInSeconds} from 'date-fns';
+import { differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { Pricing } from './Pricing';
 import { PricingResult, ProductPricing } from '../types';
 import { Dimension, LambdaDimension } from '../dimension';
-import {round} from "../util";
+import { round } from '../util';
 
-const groups = ['AWS-LambdaClient-Duration', 'AWS-LambdaClient-Requests'];
+const groups = ['AWS-Lambda-Duration', 'AWS-Lambda-Requests'];
 
 const getComputeUsage = (lambdaDimension: LambdaDimension): number => {
     const totalComputeSeconds = lambdaDimension.requestCount * (lambdaDimension.averageDuration / 1000);
@@ -32,11 +32,8 @@ export class LambdaPricing extends Pricing {
             currency: this.currency,
             estimatedMonthlyCharge: LambdaPricing.getMonthlyEstimate(totalCost, costWindowSeconds),
             totalCostWindowSeconds: costWindowSeconds,
-            totalCost: round(totalCost, 2),
-            breakdown: {
-                computeCharges: round(computeCharges, 2),
-                requestCharges: round(requestCharges, 2),
-            },
+            totalCost,
+            breakdown: { computeCharges, requestCharges },
         };
     }
 

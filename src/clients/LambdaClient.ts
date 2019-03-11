@@ -16,7 +16,7 @@ export class LambdaClient extends AWSClient {
 
     public async calculateLambdaInvocations(resource: Resource, start: Date, end: Date): Promise<number> {
         const invocations = await this.clwClient.getMetricStatistics({
-            nameSpace: 'AWS/LambdaClient',
+            nameSpace: 'AWS/Lambda',
             metricName: 'Invocations',
             dimensions: [{ Name: 'FunctionName', Value: resource.id }],
             startTime: start,
@@ -31,7 +31,7 @@ export class LambdaClient extends AWSClient {
 
     public async calculateLambdaDuration(resource: Resource, start: Date, end: Date): Promise<number> {
         const duration = await this.clwClient.getMetricStatistics({
-            nameSpace: 'AWS/LambdaClient',
+            nameSpace: 'AWS/Lambda',
             metricName: 'Duration',
             dimensions: [{ Name: 'FunctionName', Value: resource.id }],
             startTime: start,

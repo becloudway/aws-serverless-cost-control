@@ -23,7 +23,7 @@ export class LambdaDimension extends Dimension {
         this._memory = await lambdaClient.getMemory(this.resource);
 
         log.info(
-            'Executions for LambdaClient function %s: %d - Memory: %dMb - Avg Duration: %dms',
+            'Executions for Lambda function %s: %d - Memory: %dMb - Avg Duration: %dms',
             this.resource.id, this._requestCount, this._memory, this._averageDuration,
         );
 
