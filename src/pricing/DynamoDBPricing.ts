@@ -1,4 +1,4 @@
-import {differenceInMinutes, differenceInSeconds} from 'date-fns';
+import { differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { Pricing } from './Pricing';
 import { metrics, window } from '../config';
 import { DynamoDBDimension } from '../dimension';

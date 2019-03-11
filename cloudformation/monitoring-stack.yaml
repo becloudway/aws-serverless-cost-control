@@ -80,7 +80,16 @@ Resources:
                   - pricing:DescribeServices
                   - pricing:GetAttributeValues
                   - SNS:Publish
+                  - kinesis:CreateStream
+                  - kinesis:DescribeStream
+                  - kinesis:PutRecord
+                  - kinesisanalytics:CreateApplication
+                  - kinesisanalytics:DescribeApplication
                 Resource: "*"
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !GetAtt IamRoleKinesisAnalytics.Arn
       Path: "/"
       RoleName: !Sub "${Environment}-${ApplicationName}-lambda-role"
 

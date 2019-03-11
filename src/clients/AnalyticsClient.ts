@@ -2,13 +2,14 @@ import * as AWS from 'aws-sdk';
 import { readFileSync } from 'fs';
 import {
     ApplicationDetail,
-    CreateApplicationRequest, CreateApplicationResponse,
-    DescribeApplicationResponse,
+    CreateApplicationRequest,
+    CreateApplicationResponse,
+    DescribeApplicationResponse, JSONMappingParameters,
 } from 'aws-sdk/clients/kinesisanalytics';
+import { StreamDescription } from 'aws-sdk/clients/kinesis';
 import { AWSClient } from './AWSClient';
-import {StreamDescription} from "aws-sdk/clients/kinesis";
 
-const applicationCode = readFileSync('../resources/random-cut-forest.sql', { encoding: 'utf-8' });
+const applicationCode = readFileSync(`${process.cwd()}/resources/random-cut-forest.sql`, { encoding: 'utf-8' });
 
 export class AnalyticsClient extends AWSClient<AWS.KinesisAnalytics> {
     public static buildApplicationName(resourceId: string): string {
@@ -34,13 +35,20 @@ export class AnalyticsClient extends AWSClient<AWS.KinesisAnalytics> {
                             {
                                 Name: 'cost', /* required */
                                 SqlType: 'DOUBLE', /* required */
+                                Mapping: '$.cost',
                             },
                         ],
                         RecordFormat: { /* required */
                             RecordFormatType: 'JSON',
+                            MappingParameters: {
+                                JSONMappingParameters: {
+                                    RecordRowPath: '$',
+                                },
+                            },
                         },
+                        RecordEncoding: 'UTF-8',
                     },
-                    NamePrefix: resourceId, /* required */
+                    NamePrefix: 'SOURCE_SQL_STREAM', /* required */
                     KinesisStreamsInput: {
                         ResourceARN: inputStream.StreamARN, /* required */
                         RoleARN: process.env.KINESIS_ROLE, /* required */
@@ -62,7 +70,10 @@ export class AnalyticsClient extends AWSClient<AWS.KinesisAnalytics> {
         };
 
         await new Promise((resolve, reject) => {
-            this.client.createApplication(params, (err: Error, data: CreateApplicationResponse) => resolve(data && data.ApplicationSummary));
+            this.client.createApplication(params, (err: Error, data: CreateApplicationResponse) => {
+                if (err) console.error(err);
+                resolve(data && data.ApplicationSummary);
+            });
         });
 
         return this.getExistingApplication(resourceId);

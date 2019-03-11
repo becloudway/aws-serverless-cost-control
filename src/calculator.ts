@@ -1,11 +1,13 @@
-import {subMinutes} from 'date-fns';
+import { subMinutes } from 'date-fns';
+import { StreamDescription } from 'aws-sdk/clients/kinesis';
 import * as config from './config';
-import {DateRange, KinesisCostRecord, ResourceTag} from './types';
-import {analyticsClient, cloudwatchClient, KinesisClient, kinesisClient, snsClient} from './clients';
-import {log} from './logger';
-import {CostRecord} from './CostRecord';
-import {ResourceManager} from './resourceManager';
-import {StreamDescription} from "aws-sdk/clients/kinesis";
+import { DateRange, KinesisCostRecord, ResourceTag } from './types';
+import {
+    analyticsClient, cloudwatchClient, KinesisClient, kinesisClient, snsClient,
+} from './clients';
+import { log } from './logger';
+import { CostRecord } from './CostRecord';
+import { ResourceManager } from './resourceManager';
 
 const getTimeRange = (): DateRange => {
     const end = subMinutes(Date.now(), config.metrics.METRIC_DELAY);
