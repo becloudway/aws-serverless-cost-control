@@ -36,3 +36,7 @@ export interface DateRange {
     start: Date;
     end: Date;
 }
+
+export interface KinesisCostRecord {
+    cost: number;
+}

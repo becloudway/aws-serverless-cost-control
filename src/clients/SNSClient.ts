@@ -1,8 +1,9 @@
+import * as AWS from 'aws-sdk';
 import { PublishInput, PublishResponse } from 'aws-sdk/clients/sns';
 import { AWSClient } from './AWSClient';
 import { Resource } from '../resource';
 
-export class SNSClient extends AWSClient {
+export class SNSClient extends AWSClient<AWS.SNS> {
     public publish(topicArn: string, resource: Resource): Promise<PublishResponse> {
         const params: PublishInput = {
             Subject: `We are throttling your AWS resource ${resource.id}`,

@@ -7,6 +7,8 @@ import { LambdaClient } from './LambdaClient';
 import { DynamoDBClient } from './DynamoDBClient';
 import { SNSClient } from './SNSClient';
 import { RDSClient } from './RDSClient';
+import { KinesisClient } from './KinesisClient';
+import { AnalyticsClient } from './AnalyticsClient';
 
 const { CURRENT_REGION: REGION, NORTH_VIRGINIA } = regions;
 const cloudwatchClient = new CloudwatchClient(new AWS.CloudWatch({ apiVersion: '2010-08-01', region: REGION }));
@@ -16,6 +18,8 @@ const lambdaClient = new LambdaClient(new AWS.Lambda({ apiVersion: '2015-03-31',
 const rdsClient = new RDSClient(new AWS.RDS({ apiVersion: '2014-10-31', region: REGION }), cloudwatchClient);
 const dynamodbClient = new DynamoDBClient(new AWS.DynamoDB({ apiVersion: '2012-08-10', region: REGION }), cloudwatchClient);
 const snsClient = new SNSClient(new AWS.SNS({ apiVersion: '2010-03-31', region: REGION }));
+const kinesisClient = new KinesisClient(new AWS.Kinesis({ apiVersion: '2013-12-02', region: REGION }));
+const analyticsClient = new AnalyticsClient(new AWS.KinesisAnalytics({ apiVersion: '2015-08-14', region: REGION }));
 
 export {
     cloudwatchClient,
@@ -25,6 +29,8 @@ export {
     rdsClient,
     dynamodbClient,
     snsClient,
+    kinesisClient,
+    analyticsClient,
     PricingClient,
     LambdaClient,
     SNSClient,
@@ -32,4 +38,6 @@ export {
     DynamoDBClient,
     TagClient,
     CloudwatchClient,
+    KinesisClient,
+    AnalyticsClient,
 };

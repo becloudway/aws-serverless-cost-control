@@ -1,10 +1,11 @@
-import { subMinutes } from 'date-fns';
+import {subMinutes} from 'date-fns';
 import * as config from './config';
-import { DateRange, ResourceTag } from './types';
-import { cloudwatchClient, snsClient } from './clients';
-import { log } from './logger';
-import { CostRecord } from './CostRecord';
-import { ResourceManager } from './resourceManager';
+import {DateRange, KinesisCostRecord, ResourceTag} from './types';
+import {analyticsClient, cloudwatchClient, KinesisClient, kinesisClient, snsClient} from './clients';
+import {log} from './logger';
+import {CostRecord} from './CostRecord';
+import {ResourceManager} from './resourceManager';
+import {StreamDescription} from "aws-sdk/clients/kinesis";
 
 const getTimeRange = (): DateRange => {
     const end = subMinutes(Date.now(), config.metrics.METRIC_DELAY);
@@ -57,6 +58,19 @@ export const handler = async () => {
             timestamp: dateRange.end,
         })));
 
+        // PUSH DATA TO KINESIS STREAMS
+        await Promise.all(costRecords.map(async (costRecord) => {
+            const stream: StreamDescription = await kinesisClient.createStreamIfNotExists(costRecord.resource.id);
+            await analyticsClient.createApplicationIfNotExists(costRecord.resource.id, stream);
+            await kinesisClient.putRecord<KinesisCostRecord>(
+                KinesisClient.buildStreamName(costRecord.resource.id),
+                {
+                    cost: costRecord.pricing.totalCost,
+                },
+            );
+        }));
+
+        // return status OK if all is well on the western front
         return { status: 200 };
     } catch (e) {
         log.error('Something went wrong', e);

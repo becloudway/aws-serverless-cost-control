@@ -1,3 +1,4 @@
+import * as AWS from 'aws-sdk';
 import { GetProductsResponse } from 'aws-sdk/clients/pricing';
 import { ProductPricing } from '../types';
 import { AWSClient } from './AWSClient';
@@ -14,7 +15,7 @@ export interface GetProductsRequest {
     filters?: ProductFilter[];
 }
 
-export class PricingClient extends AWSClient {
+export class PricingClient extends AWSClient<AWS.Pricing> {
     public async getProducts({ serviceCode, region, filters = [] }: GetProductsRequest): Promise<ProductPricing[]> {
         const termType = 'OnDemand';
         const defaultFilter = [

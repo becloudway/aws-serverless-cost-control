@@ -1,3 +1,4 @@
+import * as AWS from 'aws-sdk';
 import { GetMetricStatisticsInput, GetMetricStatisticsOutput, PutMetricDataInput } from 'aws-sdk/clients/cloudwatch';
 import { AWSClient } from './AWSClient';
 import { metrics } from '../config';
@@ -25,7 +26,7 @@ export interface PutMetricStatisticsParams {
     metricName: string;
 }
 
-export class CloudwatchClient extends AWSClient {
+export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
     public getMetricStatistics({
         nameSpace,
         metricName,

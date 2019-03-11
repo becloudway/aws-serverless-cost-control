@@ -1,3 +1,4 @@
+import * as AWS from 'aws-sdk';
 import { GetResourcesInput, GetResourcesOutput, TagFilterList } from 'aws-sdk/clients/resourcegroupstaggingapi';
 import { AWSClient } from './AWSClient';
 
@@ -7,7 +8,7 @@ export interface GetResourcesParams {
     resourceTypeFilters: string[];
 }
 
-export class TagClient extends AWSClient {
+export class TagClient extends AWSClient<AWS.ResourceGroupsTaggingAPI> {
     public getResources({ tagsPerPage, tagFilters, resourceTypeFilters }: GetResourcesParams): Promise<GetResourcesOutput> {
         const params: GetResourcesInput = {
             TagsPerPage: tagsPerPage,

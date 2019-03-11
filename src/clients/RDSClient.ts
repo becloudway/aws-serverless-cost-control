@@ -1,3 +1,4 @@
+import * as AWS from 'aws-sdk';
 import { AWSClient } from './AWSClient';
 
 export interface RDSThrottleOptions {
@@ -6,7 +7,7 @@ export interface RDSThrottleOptions {
     autoPause: boolean;
 }
 
-export class RDSClient extends AWSClient {
+export class RDSClient extends AWSClient<AWS.RDS> {
     public async getACUs(clusterId: string, start: Date, end: Date): Promise<number> {
         const acuMetric = await this.clwClient.getMetricStatistics({
             nameSpace: 'AWS/RDS',

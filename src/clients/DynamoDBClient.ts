@@ -1,10 +1,11 @@
+import * as AWS from 'aws-sdk';
 import { DescribeTableOutput, UpdateTableOutput } from 'aws-sdk/clients/dynamodb';
 import { AWSClient } from './AWSClient';
 import { metrics } from '../config';
 import { GetMetricStatisticsParams } from './CloudwatchClient';
 import { Resource } from '../resource';
 
-export class DynamoDBClient extends AWSClient {
+export class DynamoDBClient extends AWSClient<AWS.DynamoDB> {
     public async describeTable(tableName: string): Promise<DescribeTableOutput> {
         return new Promise((resolve, reject) => this.client.describeTable({
             TableName: tableName,
