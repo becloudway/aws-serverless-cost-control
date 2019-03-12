@@ -35,6 +35,7 @@ enum DeliveryStatus {
 }
 
 interface KinesisCostRecordWithAnomalyScore extends KinesisCostRecord {
+    recordTimestamp: Date;
     ANOMALY_SCORE: number;
 }
 
@@ -63,7 +64,7 @@ export const handler = async (event: KinesisStreamInputEvent): Promise<LambdaOut
                     value: costRecord.ANOMALY_SCORE,
                     service: costRecord.service,
                     resourceId: costRecord.resourceId,
-                    timestamp: costRecord.timestamp,
+                    timestamp: costRecord.recordTimestamp,
                 });
 
                 return {

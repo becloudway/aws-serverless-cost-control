@@ -77,6 +77,7 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
                         Value: service,
                     },
                 ],
+                Unit: 'Count',
             }],
         };
 

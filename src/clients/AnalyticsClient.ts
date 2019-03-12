@@ -49,8 +49,8 @@ export class AnalyticsClient extends AWSClient<AWS.KinesisAnalytics> {
                                 Mapping: '$.service',
                             },
                             {
-                                Name: 'timestamp', /* required */
-                                SqlType: 'DATE', /* required */
+                                Name: 'recordTimestamp', /* required */
+                                SqlType: 'TIMESTAMP', /* required */
                                 Mapping: '$.timestamp',
                             },
                         ],
