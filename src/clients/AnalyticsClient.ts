@@ -38,6 +38,21 @@ export class AnalyticsClient extends AWSClient<AWS.KinesisAnalytics> {
                                 SqlType: 'DOUBLE', /* required */
                                 Mapping: '$.cost',
                             },
+                            {
+                                Name: 'resourceId', /* required */
+                                SqlType: 'VARCHAR(500)', /* required */
+                                Mapping: '$.resourceId',
+                            },
+                            {
+                                Name: 'service', /* required */
+                                SqlType: 'VARCHAR(60)', /* required */
+                                Mapping: '$.service',
+                            },
+                            {
+                                Name: 'timestamp', /* required */
+                                SqlType: 'DATE', /* required */
+                                Mapping: '$.timestamp',
+                            },
                         ],
                         RecordFormat: { /* required */
                             RecordFormatType: 'JSON',

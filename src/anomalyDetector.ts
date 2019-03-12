@@ -2,6 +2,7 @@ import { log } from './logger';
 import { cloudwatchClient } from './clients';
 import { metrics } from './config';
 import { KinesisCostRecord, MetricStatistic } from './types';
+import construct = Reflect.construct;
 
 interface LambdaDeliveryRecordMetadata {
     retryHint: number;
@@ -37,8 +38,16 @@ interface KinesisCostRecordWithAnomalyScore extends KinesisCostRecord {
     ANOMALY_SCORE: number;
 }
 
+const parseResourceIdFromApplicationArn = (applicationArn: string): string => applicationArn
+    .split('application/')[1]
+    .replace('-application', '');
+
 export const handler = async (event: KinesisStreamInputEvent): Promise<LambdaOutput> => {
+    log.info('Received event', JSON.stringify(event, null, 2));
+
     try {
+        const resourceId = parseResourceIdFromApplicationArn(event.applicationArn);
+        const now = new Date();
         const recordResponses: RecordResponse[] = await Promise.all(event.records.map(async (r) => {
             let costRecord: KinesisCostRecordWithAnomalyScore;
 
@@ -51,11 +60,10 @@ export const handler = async (event: KinesisStreamInputEvent): Promise<LambdaOut
 
                 await cloudwatchClient.putMetricData({
                     metricName: metrics.NAME_ANOMALY_SCORE,
-                    service: costRecord.service,
                     value: costRecord.ANOMALY_SCORE,
+                    service: costRecord.service,
                     resourceId: costRecord.resourceId,
                     timestamp: costRecord.timestamp,
-                    unit: MetricStatistic.Average,
                 });
 
                 return {

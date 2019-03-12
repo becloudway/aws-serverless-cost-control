@@ -47,21 +47,19 @@ export const handler = async (): Promise<LambdaResponse> => {
         // CREATE COST METRICS
         await Promise.all(costRecords.map(costRecord => cloudwatchClient.putMetricData({
             metricName: config.metrics.NAME_COST,
-            service: costRecord.resource.service,
             value: costRecord.pricing.totalCost,
             resourceId: costRecord.resource.id,
             timestamp: dateRange.end,
-            unit: MetricStatistic.Count,
+            service: costRecord.resource.service,
         })));
 
         // CREATE ESTIMATED CHARGES METRICS
         await Promise.all(costRecords.map(costRecord => cloudwatchClient.putMetricData({
             metricName: config.metrics.NAME_ESTIMATEDCHARGES,
-            service: costRecord.resource.service,
             value: costRecord.pricing.estimatedMonthlyCharge,
             resourceId: costRecord.resource.id,
             timestamp: dateRange.end,
-            unit: MetricStatistic.Count,
+            service: costRecord.resource.service,
         })));
 
         // PUSH DATA TO KINESIS STREAMS

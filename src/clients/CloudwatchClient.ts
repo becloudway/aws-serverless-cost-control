@@ -26,10 +26,9 @@ export interface GetMetricStatisticsParams {
 export interface PutMetricStatisticsParams {
     timestamp: Date;
     value: number;
-    service: string;
     resourceId: string;
     metricName: string;
-    unit: MetricStatistic;
+    service: string;
 }
 
 export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
@@ -60,23 +59,22 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
     }
 
     public putMetricData({
-        timestamp, value, service, resourceId, metricName, unit = MetricStatistic.Count,
+        timestamp, value, resourceId, metricName, service,
     }: PutMetricStatisticsParams): Promise<void> {
         const params: PutMetricDataInput = {
             Namespace: metrics.NAME_SPACE,
             MetricData: [{
                 Timestamp: timestamp,
                 Value: value,
-                Unit: unit.toString(),
                 MetricName: metricName,
                 Dimensions: [
                     {
-                        Name: metrics.DIMENSIONS.SERVICE_NAME,
-                        Value: service,
-                    },
-                    {
                         Name: metrics.DIMENSIONS.RESOURCE_ID,
                         Value: resourceId,
+                    },
+                    {
+                        Name: metrics.DIMENSIONS.SERVICE_NAME,
+                        Value: service,
                     },
                 ],
             }],
