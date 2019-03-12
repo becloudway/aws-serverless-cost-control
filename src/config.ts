@@ -44,6 +44,7 @@ const metrics = {
     NAME_SPACE: process.env.METRICS_NAMESPACE || 'Cloudway/Serverless/PricingForecast',
     NAME_ESTIMATEDCHARGES: 'MonthlyEstimatedCharges',
     NAME_COST: 'Cost',
+    NAME_ANOMALY_SCORE: 'AnomalyScore',
     DIMENSIONS: {
         SERVICE_NAME: 'ServiceName',
         RESOURCE_ID: 'ResourceId',

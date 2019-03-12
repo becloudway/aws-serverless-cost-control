@@ -5,5 +5,5 @@ const anomalyDetector = require('./lib/anomalyDetector');
 module.exports = {
     calculator: calculator.handler,
     inhibitor: inhibitor.handler,
-    anomalyDetector: anomalyDetector.hanlder,
+    anomalyDetector: anomalyDetector.handler,
 };

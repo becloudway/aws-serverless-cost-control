@@ -8,7 +8,7 @@ export class KinesisClient extends AWSClient<AWS.Kinesis> {
     }
 
     private getExistingStream(resourceId: string): Promise<StreamDescription> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.client.describeStream({
                 StreamName: KinesisClient.buildStreamName(resourceId),
             }, (err: Error, data: DescribeStreamOutput) => {
@@ -36,15 +36,12 @@ export class KinesisClient extends AWSClient<AWS.Kinesis> {
     }
 
     public async putRecord<T>(streamName: string, record: T): Promise<void> {
-        console.info("StreamName", streamName);
-        console.info("record: ", record);
         return new Promise((resolve, reject) => {
             this.client.putRecord({
                 StreamName: streamName,
                 PartitionKey: 'partitionKey', // streams only have one shard, so partitionkey is not relevant
                 Data: JSON.stringify(record),
             }, (err: Error) => {
-                console.error("putRecord error:", err);
                 if (err) reject(err);
                 resolve();
             });

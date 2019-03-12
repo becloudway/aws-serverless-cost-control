@@ -1,8 +1,7 @@
 import { differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { Pricing } from './Pricing';
 import { PricingResult, ProductPricing } from '../types';
-import { Dimension, LambdaDimension } from '../dimension';
-import { round } from '../util';
+import { LambdaDimension } from '../dimension';
 
 const groups = ['AWS-Lambda-Duration', 'AWS-Lambda-Requests'];
 

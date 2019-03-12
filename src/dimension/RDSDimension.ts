@@ -1,4 +1,3 @@
-import { start } from 'repl';
 import { Dimension } from './Dimension';
 import { rdsClient } from '../clients';
 

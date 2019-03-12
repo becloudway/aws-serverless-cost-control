@@ -1,7 +1,12 @@
 import * as AWS from 'aws-sdk';
-import { GetMetricStatisticsInput, GetMetricStatisticsOutput, PutMetricDataInput } from 'aws-sdk/clients/cloudwatch';
+import {
+    GetMetricStatisticsInput,
+    GetMetricStatisticsOutput,
+    PutMetricDataInput,
+} from 'aws-sdk/clients/cloudwatch';
 import { AWSClient } from './AWSClient';
 import { metrics } from '../config';
+import { MetricStatistic } from '../types';
 
 export interface MetricsDimension {
     Name: string;
@@ -20,10 +25,11 @@ export interface GetMetricStatisticsParams {
 
 export interface PutMetricStatisticsParams {
     timestamp: Date;
-    cost: number;
+    value: number;
     service: string;
     resourceId: string;
     metricName: string;
+    unit: MetricStatistic;
 }
 
 export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
@@ -54,14 +60,14 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
     }
 
     public putMetricData({
-        timestamp, cost, service, resourceId, metricName,
+        timestamp, value, service, resourceId, metricName, unit = MetricStatistic.Count,
     }: PutMetricStatisticsParams): Promise<void> {
         const params: PutMetricDataInput = {
             Namespace: metrics.NAME_SPACE,
             MetricData: [{
                 Timestamp: timestamp,
-                Value: cost,
-                Unit: 'Count',
+                Value: value,
+                Unit: unit.toString(),
                 MetricName: metricName,
                 Dimensions: [
                     {
@@ -71,10 +77,6 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
                     {
                         Name: metrics.DIMENSIONS.RESOURCE_ID,
                         Value: resourceId,
-                    },
-                    {
-                        Name: metrics.DIMENSIONS.CURRENCY,
-                        Value: metrics.DIMENSIONS.CURRENCY_USD,
                     },
                 ],
             }],

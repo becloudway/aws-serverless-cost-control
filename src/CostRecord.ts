@@ -2,7 +2,7 @@ import { Resource } from './resource';
 import {
     Dimension, DynamoDBDimension, LambdaDimension, RDSDimension,
 } from './dimension';
-import { DateRange, ObjectIndexer, PricingResult } from './types';
+import { DateRange, PricingResult } from './types';
 import {
     DynamoDBPricing, LambdaPricing, Pricing, RDSPricing,
 } from './pricing';

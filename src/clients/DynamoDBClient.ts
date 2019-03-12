@@ -1,5 +1,5 @@
 import * as AWS from 'aws-sdk';
-import { DescribeTableOutput, UpdateTableOutput } from 'aws-sdk/clients/dynamodb';
+import { DescribeTableOutput } from 'aws-sdk/clients/dynamodb';
 import { AWSClient } from './AWSClient';
 import { metrics } from '../config';
 import { GetMetricStatisticsParams } from './CloudwatchClient';

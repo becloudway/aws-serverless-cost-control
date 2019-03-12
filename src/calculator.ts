@@ -1,7 +1,9 @@
 import { subMinutes } from 'date-fns';
 import { StreamDescription } from 'aws-sdk/clients/kinesis';
 import * as config from './config';
-import { DateRange, KinesisCostRecord, ResourceTag } from './types';
+import {
+    DateRange, KinesisCostRecord, LambdaResponse, MetricStatistic, ResourceTag,
+} from './types';
 import {
     analyticsClient, cloudwatchClient, KinesisClient, kinesisClient, snsClient,
 } from './clients';
@@ -15,7 +17,7 @@ const getTimeRange = (): DateRange => {
     return { start, end };
 };
 
-export const handler = async () => {
+export const handler = async (): Promise<LambdaResponse> => {
     try {
         const dateRange = getTimeRange();
         const resourceTag: ResourceTag = {
@@ -46,33 +48,37 @@ export const handler = async () => {
         await Promise.all(costRecords.map(costRecord => cloudwatchClient.putMetricData({
             metricName: config.metrics.NAME_COST,
             service: costRecord.resource.service,
-            cost: costRecord.pricing.totalCost,
+            value: costRecord.pricing.totalCost,
             resourceId: costRecord.resource.id,
             timestamp: dateRange.end,
+            unit: MetricStatistic.Count,
         })));
 
         // CREATE ESTIMATED CHARGES METRICS
         await Promise.all(costRecords.map(costRecord => cloudwatchClient.putMetricData({
             metricName: config.metrics.NAME_ESTIMATEDCHARGES,
             service: costRecord.resource.service,
-            cost: costRecord.pricing.estimatedMonthlyCharge,
+            value: costRecord.pricing.estimatedMonthlyCharge,
             resourceId: costRecord.resource.id,
             timestamp: dateRange.end,
+            unit: MetricStatistic.Count,
         })));
 
         // PUSH DATA TO KINESIS STREAMS
-        await Promise.all(costRecords.map(async (costRecord) => {
+        await Promise.all(costRecords.map(async (costRecord: CostRecord) => {
             const stream: StreamDescription = await kinesisClient.createStreamIfNotExists(costRecord.resource.id);
             await analyticsClient.createApplicationIfNotExists(costRecord.resource.id, stream);
             await kinesisClient.putRecord<KinesisCostRecord>(
                 KinesisClient.buildStreamName(costRecord.resource.id),
                 {
                     cost: costRecord.pricing.totalCost,
+                    resourceId: costRecord.resource.id,
+                    service: costRecord.resource.service,
+                    timestamp: dateRange.end,
                 },
             );
         }));
 
-        // return status OK if all is well on the western front
         return { status: 200 };
     } catch (e) {
         log.error('Something went wrong', e);

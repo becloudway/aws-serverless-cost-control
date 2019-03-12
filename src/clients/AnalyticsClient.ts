@@ -4,10 +4,11 @@ import {
     ApplicationDetail,
     CreateApplicationRequest,
     CreateApplicationResponse,
-    DescribeApplicationResponse, JSONMappingParameters,
+    DescribeApplicationResponse,
 } from 'aws-sdk/clients/kinesisanalytics';
 import { StreamDescription } from 'aws-sdk/clients/kinesis';
 import { AWSClient } from './AWSClient';
+import { log } from '../logger';
 
 const applicationCode = readFileSync(`${process.cwd()}/resources/random-cut-forest.sql`, { encoding: 'utf-8' });
 
@@ -17,7 +18,7 @@ export class AnalyticsClient extends AWSClient<AWS.KinesisAnalytics> {
     }
 
     private getExistingApplication(resourceId: string): Promise<ApplicationDetail> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.client.describeApplication({
                 ApplicationName: AnalyticsClient.buildApplicationName(resourceId),
             }, (err: Error, data: DescribeApplicationResponse) => resolve(data && data.ApplicationDetail));
@@ -69,9 +70,9 @@ export class AnalyticsClient extends AWSClient<AWS.KinesisAnalytics> {
             ],
         };
 
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve) => {
             this.client.createApplication(params, (err: Error, data: CreateApplicationResponse) => {
-                if (err) console.error(err);
+                if (err) log.error(err);
                 resolve(data && data.ApplicationSummary);
             });
         });
@@ -84,4 +85,8 @@ export class AnalyticsClient extends AWSClient<AWS.KinesisAnalytics> {
         if (!application) await this.createApplication(resourceId, inputStream);
         return application || this.getExistingApplication(resourceId);
     }
+
+    // private startApplication(resourceId) {
+    //
+    // }
 }

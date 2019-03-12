@@ -1,7 +1,7 @@
 import { differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { Pricing } from './Pricing';
 import { RDSDimension } from '../dimension';
-import { metrics, window } from '../config';
+import { window } from '../config';
 import { PricingResult } from '../types';
 
 export class RDSPricing extends Pricing {

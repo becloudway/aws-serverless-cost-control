@@ -39,4 +39,21 @@ export interface DateRange {
 
 export interface KinesisCostRecord {
     cost: number;
+    resourceId: string;
+    service: string;
+    timestamp: Date;
+}
+
+export enum MetricStatistic {
+    Average,
+    Count,
+    Samplecount,
+    Sum,
+    Minimum,
+    Maximum,
+}
+
+export interface LambdaResponse {
+    status: number;
+    message?: string;
 }
