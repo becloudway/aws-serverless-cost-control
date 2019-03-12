@@ -1,12 +1,8 @@
 import * as AWS from 'aws-sdk';
-import {
-    GetMetricStatisticsInput,
-    GetMetricStatisticsOutput,
-    PutMetricDataInput,
-} from 'aws-sdk/clients/cloudwatch';
+import { GetMetricStatisticsInput, GetMetricStatisticsOutput, PutMetricDataInput } from 'aws-sdk/clients/cloudwatch';
 import { AWSClient } from './AWSClient';
 import { metrics } from '../config';
-import { MetricStatistic } from '../types';
+import { log } from '../logger';
 
 export interface MetricsDimension {
     Name: string;
