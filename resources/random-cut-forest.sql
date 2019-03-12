@@ -6,6 +6,9 @@ CREATE OR REPLACE STREAM "TEMP_STREAM" (
 --Creates another stream for application output.
 CREATE OR REPLACE STREAM "DESTINATION_SQL_STREAM" (
 	        "cost"             DOUBLE,
+	        "timestamp"        TIMESTAMP,
+	        "resourceId"       VARCHAR(500),
+	        "service"          VARCHAR(60),
 	        "ANOMALY_SCORE"    DOUBLE);
 
 -- Compute an anomaly score for each record in the input stream
