@@ -39,8 +39,6 @@ export interface DateRange {
 
 export interface KinesisCostRecord {
     cost: number;
-    resourceId: string;
-    service: string;
     timestamp: Date;
 }
 
@@ -56,4 +54,41 @@ export enum MetricStatistic {
 export interface LambdaResponse {
     status: number;
     message?: string;
+}
+
+export interface LambdaDeliveryRecordMetadata {
+    retryHint: number;
+}
+
+interface KinesisStreamRecord {
+    recordId: string;
+    lambdaDeliveryRecordMetadata: LambdaDeliveryRecordMetadata;
+    data: string;
+}
+
+export interface KinesisStreamInputEvent {
+    invocationId: string;
+    applicationArn: string;
+    records: KinesisStreamRecord[];
+}
+
+export interface RecordResponse {
+    recordId: string;
+    result: DeliveryStatus;
+}
+
+export interface LambdaOutput {
+    records: RecordResponse[];
+}
+
+export enum DeliveryStatus {
+    Ok,
+    DeliveryFailed,
+}
+
+export interface KinesisCostRecordWithAnomalyScore extends KinesisCostRecord {
+    recordTimestamp: Date;
+    resourceId: string;
+    service: string;
+    ANOMALY_SCORE: number;
 }

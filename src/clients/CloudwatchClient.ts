@@ -1,8 +1,14 @@
 import * as AWS from 'aws-sdk';
-import { GetMetricStatisticsInput, GetMetricStatisticsOutput, PutMetricDataInput } from 'aws-sdk/clients/cloudwatch';
+import {
+    Dimension,
+    GetMetricStatisticsInput,
+    GetMetricStatisticsOutput,
+    PutMetricDataInput,
+} from 'aws-sdk/clients/cloudwatch';
 import { AWSClient } from './AWSClient';
 import { metrics } from '../config';
 import { log } from '../logger';
+import { DateRange } from '../types';
 
 export interface MetricsDimension {
     Name: string;
@@ -19,9 +25,16 @@ export interface GetMetricStatisticsParams {
     statistics: string[];
 }
 
-export interface PutMetricStatisticsParams {
+export interface PutCostMetricStatisticsParams {
     timestamp: Date;
     value: number;
+    resourceId: string;
+    metricName: string;
+    service: string;
+}
+
+export interface GetCostMetricStatisticsParams {
+    range: DateRange;
     resourceId: string;
     metricName: string;
     service: string;
@@ -54,34 +67,70 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
         });
     }
 
-    public putMetricData({
+    public getCostMetricStatistics(params: GetCostMetricStatisticsParams): Promise<GetMetricStatisticsOutput> {
+        return this.getMetricStatistics({
+            nameSpace: metrics.NAME_SPACE,
+            metricName: params.metricName,
+            dimensions: CloudwatchClient.buildCostDimensions(params.service, params.resourceId),
+            startTime: params.range.start,
+            endTime: params.range.end,
+            period: 60 * metrics.METRIC_WINDOW,
+            statistics: ['Average'],
+        });
+    }
+
+    private static buildCostDimensions(service: string, resourceId: string): Dimension[] {
+        return [
+            {
+                Name: metrics.DIMENSIONS.RESOURCE_ID,
+                Value: resourceId,
+            },
+            {
+                Name: metrics.DIMENSIONS.SERVICE_NAME,
+                Value: service,
+            },
+        ];
+    }
+
+    public putCostMetricData({
         timestamp, value, resourceId, metricName, service,
-    }: PutMetricStatisticsParams): Promise<void> {
+    }: PutCostMetricStatisticsParams): Promise<void> {
         const params: PutMetricDataInput = {
             Namespace: metrics.NAME_SPACE,
             MetricData: [{
                 Timestamp: timestamp,
                 Value: value,
                 MetricName: metricName,
-                Dimensions: [
-                    {
-                        Name: metrics.DIMENSIONS.RESOURCE_ID,
-                        Value: resourceId,
-                    },
-                    {
-                        Name: metrics.DIMENSIONS.SERVICE_NAME,
-                        Value: service,
-                    },
-                ],
+                Dimensions: CloudwatchClient.buildCostDimensions(service, resourceId),
                 Unit: 'Count',
             }],
         };
 
+        return this.putMetricData(params);
+    }
+
+    public putAnomalyMetricData(timestamp: Date, value: number) {
+        const params: PutMetricDataInput = {
+            Namespace: metrics.NAME_SPACE,
+            MetricData: [{
+                Timestamp: timestamp,
+                Value: value,
+                MetricName: metrics.NAME_ANOMALY_SCORE,
+                Unit: 'Count',
+            }],
+        };
+
+        return this.putMetricData(params);
+
+    }
+
+    private putMetricData(params: PutMetricDataInput): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.client.putMetricData(params, (err: Error) => {
                 if (err) reject(err);
                 resolve();
             });
         });
+
     }
 }

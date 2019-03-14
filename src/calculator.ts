@@ -1,25 +1,14 @@
-import { subMinutes } from 'date-fns';
-import { StreamDescription } from 'aws-sdk/clients/kinesis';
 import * as config from './config';
-import {
-    DateRange, KinesisCostRecord, LambdaResponse, MetricStatistic, ResourceTag,
-} from './types';
-import {
-    analyticsClient, cloudwatchClient, KinesisClient, kinesisClient, snsClient,
-} from './clients';
+import { DateRange, LambdaResponse, ResourceTag } from './types';
+import { cloudwatchClient, snsClient } from './clients';
 import { log } from './logger';
 import { CostRecord } from './CostRecord';
 import { ResourceManager } from './resourceManager';
-
-const getTimeRange = (): DateRange => {
-    const end = subMinutes(Date.now(), config.metrics.METRIC_DELAY);
-    const start = subMinutes(end, config.metrics.METRIC_WINDOW);
-    return { start, end };
-};
+import { getTimeRange } from './util';
 
 export const handler = async (): Promise<LambdaResponse> => {
     try {
-        const dateRange = getTimeRange();
+        const dateRange: DateRange = getTimeRange(config.metrics.METRIC_DELAY, config.metrics.METRIC_WINDOW);
         const resourceTag: ResourceTag = {
             key: config.TAGS.SCC_MONITOR_GROUP,
             value: 'true',
@@ -45,7 +34,7 @@ export const handler = async (): Promise<LambdaResponse> => {
         await Promise.all(actionableResources.map(r => snsClient.publish(process.env.ACTIONABLE_TOPIC_ARN, r)));
 
         // CREATE COST METRICS
-        await Promise.all(costRecords.map(costRecord => cloudwatchClient.putMetricData({
+        await Promise.all(costRecords.map(costRecord => cloudwatchClient.putCostMetricData({
             metricName: config.metrics.NAME_COST,
             value: costRecord.pricing.totalCost,
             resourceId: costRecord.resource.id,
@@ -54,28 +43,13 @@ export const handler = async (): Promise<LambdaResponse> => {
         })));
 
         // CREATE ESTIMATED CHARGES METRICS
-        await Promise.all(costRecords.map(costRecord => cloudwatchClient.putMetricData({
+        await Promise.all(costRecords.map(costRecord => cloudwatchClient.putCostMetricData({
             metricName: config.metrics.NAME_ESTIMATEDCHARGES,
             value: costRecord.pricing.estimatedMonthlyCharge,
             resourceId: costRecord.resource.id,
             timestamp: dateRange.end,
             service: costRecord.resource.service,
         })));
-
-        // PUSH DATA TO KINESIS STREAMS
-        await Promise.all(costRecords.map(async (costRecord: CostRecord) => {
-            const stream: StreamDescription = await kinesisClient.createStreamIfNotExists(costRecord.resource.id);
-            await analyticsClient.createApplicationIfNotExists(costRecord.resource.id, stream);
-            await kinesisClient.putRecord<KinesisCostRecord>(
-                KinesisClient.buildStreamName(costRecord.resource.id),
-                {
-                    cost: costRecord.pricing.totalCost,
-                    resourceId: costRecord.resource.id,
-                    service: costRecord.resource.service,
-                    timestamp: dateRange.end,
-                },
-            );
-        }));
 
         return { status: 200 };
     } catch (e) {

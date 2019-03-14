@@ -152,6 +152,25 @@ Resources:
     DependsOn:
       - IamRoleLambdaExecution
 
+  CostStreamLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
+        S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
+      FunctionName: !Sub "${Environment}-${ApplicationName}-cost-streamer"
+      Handler: index.costStreamer
+      MemorySize: 1024
+      Role: !GetAtt IamRoleLambdaExecution.Arn
+      Runtime: nodejs8.10
+      Timeout: 300
+      Environment:
+        Variables:
+          METRICS_NAMESPACE: !Ref MetricNameSpace
+          KINESIS_STREAM_NAME: Ref ServerlessCostStream
+    DependsOn:
+      - IamRoleLambdaExecution
+
   # ============= TRIGGERS ============== #
   CalculatorEventsRuleSchedule:
     Type: AWS::Events::Rule
@@ -169,6 +188,22 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: !Sub "events.${AWS::URLSuffix}"
       SourceArn: !GetAtt CalculatorEventsRuleSchedule.Arn
+  CostStreamerEventsRuleSchedule:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: rate(1 minute)
+      State: ENABLED
+      Targets:
+        - Input: ''
+          Arn: !GetAtt CostStreamLambdaFunction.Arn
+          Id: costStreamerSchedule
+  CostStreamerLambdaPermissionEventsRuleSchedule:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt CostStreamLambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: !Sub "events.${AWS::URLSuffix}"
+      SourceArn: !GetAtt CostStreamerEventsRuleSchedule.Arn
 
   # ============= SNS ============== #
   SNSTopicSccInhibitor:
@@ -189,3 +224,74 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: !Sub "sns.${AWS::URLSuffix}"
       SourceArn: !Sub "arn:${AWS::Partition}:sns:${AWS::Region}:${AWS::AccountId}:${Environment}-${ApplicationName}-topic"
+
+  # ============= KINESIS ============== #
+  ServerlessCostStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub "${Environment}-${ApplicationName}-stream"
+      RetentionPeriodHours: 24
+      ShardCount: 1
+  ServerlessAnomalyApplicationOutput:
+    Type: AWS::KinesisAnalytics::ApplicationOutput
+    Properties:
+      ApplicationName: !Ref ServerlessAnomalyApplication
+      Output:
+        Name: DESTINATION_SQL_STREAM
+        DestinationSchema:
+          RecordFormatType: JSON
+        LambdaOutput:
+          ResourceARN: !GetAtt CostStreamLambdaFunction.Arn
+          RoleARN: !GetAtt IamRoleKinesisAnalytics.Arn
+  ServerlessAnomalyApplication:
+    Type: AWS::KinesisAnalytics::Application
+    Properties:
+      ApplicationName: !Sub "${Environment}-${ApplicationName}-application"
+      ApplicationDescription: Applies Random Cut Forest Algorithm for anomaly detection
+      ApplicationCode: |
+        --Creates a temporary stream.
+        CREATE OR REPLACE STREAM "TEMP_STREAM" (
+        "cost"            DOUBLE,
+        "recordTimestamp" TIMESTAMP,
+        "ANOMALY_SCORE"   DOUBLE);
+
+        --Creates another stream for application output.
+        CREATE OR REPLACE STREAM "DESTINATION_SQL_STREAM" (
+        "cost"            DOUBLE,
+        "recordTimestamp" TIMESTAMP,
+        "ANOMALY_SCORE"   DOUBLE);
+
+        -- Compute an anomaly score for each record in the input stream using Random Cut Forest
+        CREATE OR REPLACE PUMP "STREAM_PUMP" AS INSERT INTO "TEMP_STREAM"
+        SELECT STREAM SOURCE."cost", SOURCE."recordTimestamp", rcf."ANOMALY_SCORE" FROM
+        TABLE(RANDOM_CUT_FOREST(
+        CURSOR(SELECT STREAM "cost" FROM SOURCE_SQL_STREAM_001), 80, 256, 100000, 1
+        )
+        ) AS rcf, SOURCE_SQL_STREAM_001 AS SOURCE;
+
+        -- Sort records by descending anomaly score, insert into output stream
+        CREATE OR REPLACE PUMP "OUTPUT_PUMP" AS
+        INSERT INTO "DESTINATION_SQL_STREAM"
+        SELECT STREAM * FROM "TEMP_STREAM"
+        ORDER BY FLOOR("TEMP_STREAM".ROWTIME TO SECOND), ANOMALY_SCORE DESC;
+
+      Inputs:
+        - NamePrefix: 'SOURCE_SQL_STREAM'
+          KinesisStreamsInput: {
+            ResourceARN: !GetAtt ServerlessCostStream.Arn
+            RoleARN: !GetAtt IamRoleKinesisAnalytics.Arn
+          InputSchema:
+            RecordColumns:
+               - Name: 'cost'
+                 SqlType: 'DOUBLE'
+                 Mapping: '$.cost'
+               - Name: 'recordTimestamp'
+                 SqlType: 'TIMESTAMP'
+                 Mapping: '$.timestamp'
+              RecordFormat:
+                RecordFormatType: 'JSON'
+                MappingParameters:
+                  JSONMappingParameters:
+                    RecordRowPath: '$'
+              RecordEncoding: 'UTF-8'
+
