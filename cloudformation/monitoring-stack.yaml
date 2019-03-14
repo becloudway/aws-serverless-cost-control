@@ -167,7 +167,7 @@ Resources:
       Environment:
         Variables:
           METRICS_NAMESPACE: !Ref MetricNameSpace
-          KINESIS_STREAM_NAME: Ref ServerlessCostStream
+          KINESIS_STREAM_NAME: !Ref ServerlessCostStream
     DependsOn:
       - IamRoleLambdaExecution
 
@@ -241,7 +241,7 @@ Resources:
         DestinationSchema:
           RecordFormatType: JSON
         LambdaOutput:
-          ResourceARN: !GetAtt CostStreamLambdaFunction.Arn
+          ResourceARN: !GetAtt AnomalyDetectorLambdaFunction.Arn
           RoleARN: !GetAtt IamRoleKinesisAnalytics.Arn
   ServerlessAnomalyApplication:
     Type: AWS::KinesisAnalytics::Application
