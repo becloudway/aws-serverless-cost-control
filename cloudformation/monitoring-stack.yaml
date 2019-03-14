@@ -276,22 +276,22 @@ Resources:
         ORDER BY FLOOR("TEMP_STREAM".ROWTIME TO SECOND), ANOMALY_SCORE DESC;
 
       Inputs:
-        - NamePrefix: 'SOURCE_SQL_STREAM'
-          KinesisStreamsInput: {
+        - NamePrefix: SOURCE_SQL_STREAM
+          KinesisStreamsInput:
             ResourceARN: !GetAtt ServerlessCostStream.Arn
             RoleARN: !GetAtt IamRoleKinesisAnalytics.Arn
           InputSchema:
             RecordColumns:
-               - Name: 'cost'
-                 SqlType: 'DOUBLE'
-                 Mapping: '$.cost'
-               - Name: 'recordTimestamp'
-                 SqlType: 'TIMESTAMP'
-                 Mapping: '$.timestamp'
+               - Name: cost
+                 SqlType: DOUBLE
+                 Mapping: $.cost
+               - Name: recordTimestamp
+                 SqlType: TIMESTAMP
+                 Mapping: $.timestamp
               RecordFormat:
-                RecordFormatType: 'JSON'
+                RecordFormatType: JSON
                 MappingParameters:
                   JSONMappingParameters:
-                    RecordRowPath: '$'
-              RecordEncoding: 'UTF-8'
+                    RecordRowPath: $
+              RecordEncoding: UTF-8
 
