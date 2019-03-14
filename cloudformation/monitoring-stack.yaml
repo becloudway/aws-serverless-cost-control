@@ -288,10 +288,10 @@ Resources:
                - Name: recordTimestamp
                  SqlType: TIMESTAMP
                  Mapping: $.timestamp
-              RecordFormat:
-                RecordFormatType: JSON
-                MappingParameters:
-                  JSONMappingParameters:
-                    RecordRowPath: $
-              RecordEncoding: UTF-8
+            RecordFormat:
+              RecordFormatType: JSON
+              MappingParameters:
+                JSONMappingParameters:
+                  RecordRowPath: $
+            RecordEncoding: UTF-8
 
