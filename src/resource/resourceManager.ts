@@ -1,7 +1,7 @@
-import { RESOURCE_MAP, TAGS } from './config';
+import { RESOURCE_MAP, TAGS, SERVICE_DYNAMODB } from '../config';
 import { Resource } from './resource';
-import { AWSTag, ResourceTag } from './types';
-import { tagClient } from './clients';
+import { AWSTag, ResourceTag } from '../types';
+import { tagClient } from '../clients';
 
 const getTagValue = (tags: AWSTag[], key: string): string => {
     const tag = tags.find(tagSet => tagSet.Key === key);
@@ -41,7 +41,7 @@ export class ResourceManager {
             // eslint-disable-next-line prefer-const
             let [,, service, region,, type, resourceId] = arn.split(':');
 
-            if (service === 'dynamodb') {
+            if (service === SERVICE_DYNAMODB) {
                 [type, resourceId] = type.split('/');
             }
 

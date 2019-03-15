@@ -3,7 +3,7 @@ import { DescribeTableOutput } from 'aws-sdk/clients/dynamodb';
 import { AWSClient } from './AWSClient';
 import { metrics } from '../config';
 import { GetMetricStatisticsParams } from './CloudwatchClient';
-import { Resource } from '../resource';
+import { Resource } from '../resource/resource';
 
 export class DynamoDBClient extends AWSClient<AWS.DynamoDB> {
     public async describeTable(tableName: string): Promise<DescribeTableOutput> {

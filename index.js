@@ -1,11 +1,11 @@
-const calculator = require('./lib/calculator');
-const inhibitor = require('./lib/inhibitor');
+const resourceCostCalculator = require('./lib/resourceCostCalculator');
+const resourceThrottler = require('./lib/resourceThrottler');
 const anomalyDetector = require('./lib/anomalyDetector');
 const costStreamer = require('./lib/costStreamer');
 
 module.exports = {
-    calculator: calculator.handler,
-    inhibitor: inhibitor.handler,
-    anomalyDetector: anomalyDetector.handler,
+    resourceCostCalculator: resourceCostCalculator.handler,
     costStreamer: costStreamer.handler,
+    resourceThrottler: resourceThrottler.handler,
+    anomalyDetector: anomalyDetector.handler,
 };

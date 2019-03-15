@@ -121,7 +121,6 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
         };
 
         return this.putMetricData(params);
-
     }
 
     private putMetricData(params: PutMetricDataInput): Promise<void> {
@@ -131,6 +130,5 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
                 resolve();
             });
         });
-
     }
 }

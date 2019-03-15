@@ -2,9 +2,9 @@ import * as config from './config';
 import { DateRange, LambdaResponse, ResourceTag } from './types';
 import { cloudwatchClient, snsClient } from './clients';
 import { log } from './logger';
-import { CostRecord } from './CostRecord';
-import { ResourceManager } from './resourceManager';
+import { ResourceManager } from './resource';
 import { getTimeRange } from './util';
+import { CostRecord } from './pricing';
 
 export const handler = async (): Promise<LambdaResponse> => {
     try {
@@ -23,15 +23,12 @@ export const handler = async (): Promise<LambdaResponse> => {
         ])));
         const costRecords = await Promise.all(resources.map(resource => new CostRecord(resource).fetch(dateRange)));
 
-        // TRIGGER ACTIONS IF NEEDED
-        const actionableResources = costRecords
-            .filter(cr => cr.resource.actionable)
+        // TRIGGER NOTIFICATIONS IF NEEDED
+        const resourcesInAlarm = costRecords
             .filter(cr => cr.pricing.estimatedMonthlyCharge >= cr.resource.costLimit)
             .map(cr => cr.resource);
 
-        log.info('Actionable resources: ', actionableResources);
-
-        await Promise.all(actionableResources.map(r => snsClient.publish(process.env.ACTIONABLE_TOPIC_ARN, r)));
+        await Promise.all(resourcesInAlarm.map(r => snsClient.publish(process.env.ACTIONABLE_TOPIC_ARN, r)));
 
         // CREATE COST METRICS
         await Promise.all(costRecords.map(costRecord => cloudwatchClient.putCostMetricData({

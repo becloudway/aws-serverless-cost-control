@@ -4,7 +4,7 @@ import { subMinutes } from 'date-fns';
 import { LambdaDimension } from '../src/dimension';
 import { LambdaPricing } from '../src/pricing';
 import { PricingResult, ProductPricing } from '../src/types';
-import { Resource } from '../src/resource';
+import { Resource } from '../src/resource/resource';
 import { PricingClient } from '../src/clients';
 
 const ONE_MILLION = 1000 * 1000;

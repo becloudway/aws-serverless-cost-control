@@ -1,13 +1,13 @@
-import { Resource } from './resource';
+import { Resource } from '../resource';
 import {
     Dimension, DynamoDBDimension, LambdaDimension, RDSDimension,
-} from './dimension';
-import { DateRange, PricingResult } from './types';
+} from '../dimension';
+import { DateRange, PricingResult } from '../types';
 import {
     DynamoDBPricing, LambdaPricing, Pricing, RDSPricing,
-} from './pricing';
-import { SERVICE_DYNAMODB, SERVICE_LAMBDA, SERVICE_RDS } from './config';
-import { log } from './logger';
+} from '.';
+import { SERVICE_DYNAMODB, SERVICE_LAMBDA, SERVICE_RDS } from '../config';
+import { log } from '../logger';
 
 const pricings = new Map<string, new() => Pricing>();
 pricings.set(SERVICE_DYNAMODB, DynamoDBPricing);

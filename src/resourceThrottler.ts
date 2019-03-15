@@ -1,15 +1,15 @@
 import { SNSEvent } from 'aws-lambda';
 import { SERVICE_DYNAMODB, SERVICE_LAMBDA, SERVICE_RDS } from './config';
 import { dynamodbClient, lambdaClient, rdsClient } from './clients';
-
 import { log } from './logger';
 import { Resource } from './resource';
 import { LambdaResponse } from './types';
 
 const parseActionablesFromEvent = ({ Records }: SNSEvent): Resource[] => Records.map((record) => {
     const attributes = record.Sns.MessageAttributes;
-    return new Resource(attributes.serviceName.Value, attributes.resourceId.Value);
-});
+    const isActionable = attributes.actionable.Value === 'true';
+    return new Resource(attributes.serviceName.Value, attributes.resourceId.Value, null, null, null, isActionable);
+}).filter(r => r.actionable);
 
 // eslint-disable-next-line func-call-spacing,no-spaced-func
 const actions = new Map<string, (id: string) => void>();

@@ -2,7 +2,7 @@ import * as AWS from 'aws-sdk';
 import { FunctionConfiguration } from 'aws-sdk/clients/lambda';
 import { AWSClient } from './AWSClient';
 import { metrics } from '../config';
-import { Resource } from '../resource';
+import { Resource } from '../resource/resource';
 
 export class LambdaClient extends AWSClient<AWS.Lambda> {
     public throttle(resourceId: string, allowedConcurrentExecutions: number = 1): Promise<void> {

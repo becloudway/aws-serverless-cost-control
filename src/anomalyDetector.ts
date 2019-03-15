@@ -1,6 +1,5 @@
 import { log } from './logger';
 import { cloudwatchClient } from './clients';
-import { metrics } from './config';
 import {
     DeliveryStatus,
     KinesisCostRecordWithAnomalyScore,

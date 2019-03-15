@@ -94,14 +94,14 @@ Resources:
       RoleName: !Sub "${Environment}-${ApplicationName}-lambda-role"
 
   # ============= LAMBDA ============== #
-  CalculatorLambdaFunction:
+  ResourceCostCalculatorFn:
     Type: AWS::Lambda::Function
     Properties:
       Code:
         S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
         S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
-      FunctionName: !Sub "${Environment}-${ApplicationName}-calculator"
-      Handler: index.calculator
+      FunctionName: !Sub "${Environment}-${ApplicationName}-resource-cost-calculator"
+      Handler: index.resourceCostCalculator
       MemorySize: 1024
       Role: !GetAtt IamRoleLambdaExecution.Arn
       Runtime: nodejs8.10
@@ -111,19 +111,19 @@ Resources:
           METRICS_NAMESPACE: !Ref MetricNameSpace
           ACTIONABLE_TOPIC_ARN: !Ref SNSTopicSccInhibitor
           KINESIS_ROLE: !GetAtt IamRoleKinesisAnalytics.Arn
-          ANOMALY_DETECTOR_LAMBDA_ARN: !GetAtt AnomalyDetectorLambdaFunction.Arn
+          ANOMALY_DETECTOR_LAMBDA_ARN: !GetAtt AnomalyDetectorFn.Arn
     DependsOn:
       - IamRoleLambdaExecution
       - IamRoleKinesisAnalytics
 
-  InhibitorLambdaFunction:
+  ResourceThrottlerFn:
     Type: AWS::Lambda::Function
     Properties:
       Code:
         S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
         S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
-      FunctionName: !Sub "${Environment}-${ApplicationName}-inhibitor"
-      Handler: index.inhibitor
+      FunctionName: !Sub "${Environment}-${ApplicationName}-resource-throttler"
+      Handler: index.resourceThrottler
       MemorySize: 1024
       Role: !GetAtt IamRoleLambdaExecution.Arn
       Runtime: nodejs8.10
@@ -134,7 +134,7 @@ Resources:
     DependsOn:
     - IamRoleLambdaExecution
 
-  AnomalyDetectorLambdaFunction:
+  AnomalyDetectorFn:
     Type: AWS::Lambda::Function
     Properties:
       Code:
@@ -152,7 +152,7 @@ Resources:
     DependsOn:
       - IamRoleLambdaExecution
 
-  CostStreamLambdaFunction:
+  CostStreamerFn:
     Type: AWS::Lambda::Function
     Properties:
       Code:
@@ -172,22 +172,22 @@ Resources:
       - IamRoleLambdaExecution
 
   # ============= TRIGGERS ============== #
-  CalculatorEventsRuleSchedule:
+  ResourceCostCalculatorEventsRuleSchedule:
     Type: AWS::Events::Rule
     Properties:
       ScheduleExpression: rate(1 minute)
       State: ENABLED
       Targets:
       - Input: '{"scc-monitor-group":"scc-monitor-group"}'
-        Arn: !GetAtt CalculatorLambdaFunction.Arn
+        Arn: !GetAtt ResourceCostCalculatorFn.Arn
         Id: calculatorSchedule
-  CalculatorLambdaPermissionEventsRuleSchedule:
+  ResourceCostCalculatorPermissionEventsRuleSchedule:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !GetAtt CalculatorLambdaFunction.Arn
+      FunctionName: !GetAtt ResourceCostCalculatorFn.Arn
       Action: lambda:InvokeFunction
       Principal: !Sub "events.${AWS::URLSuffix}"
-      SourceArn: !GetAtt CalculatorEventsRuleSchedule.Arn
+      SourceArn: !GetAtt ResourceCostCalculatorEventsRuleSchedule.Arn
   CostStreamerEventsRuleSchedule:
     Type: AWS::Events::Rule
     Properties:
@@ -195,12 +195,12 @@ Resources:
       State: ENABLED
       Targets:
         - Input: ''
-          Arn: !GetAtt CostStreamLambdaFunction.Arn
+          Arn: !GetAtt CostStreamerFn.Arn
           Id: costStreamerSchedule
-  CostStreamerLambdaPermissionEventsRuleSchedule:
+  CostStreamerFnPermissionEventsRuleSchedule:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !GetAtt CostStreamLambdaFunction.Arn
+      FunctionName: !GetAtt CostStreamerFn.Arn
       Action: lambda:InvokeFunction
       Principal: !Sub "events.${AWS::URLSuffix}"
       SourceArn: !GetAtt CostStreamerEventsRuleSchedule.Arn
@@ -212,7 +212,7 @@ Resources:
       TopicName: !Sub "${Environment}-${ApplicationName}-topic"
       DisplayName: ''
       Subscription:
-        - Endpoint: !GetAtt InhibitorLambdaFunction.Arn
+        - Endpoint: !GetAtt ResourceThrottlerFn.Arn
           Protocol: lambda
         - Endpoint: !Ref MonitorEmail
           Protocol: email
@@ -220,7 +220,7 @@ Resources:
   SNSTopicSccInhibitorPermission:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !GetAtt InhibitorLambdaFunction.Arn
+      FunctionName: !GetAtt ResourceThrottlerFn.Arn
       Action: lambda:InvokeFunction
       Principal: !Sub "sns.${AWS::URLSuffix}"
       SourceArn: !Sub "arn:${AWS::Partition}:sns:${AWS::Region}:${AWS::AccountId}:${Environment}-${ApplicationName}-topic"
@@ -241,7 +241,7 @@ Resources:
         DestinationSchema:
           RecordFormatType: JSON
         LambdaOutput:
-          ResourceARN: !GetAtt AnomalyDetectorLambdaFunction.Arn
+          ResourceARN: !GetAtt AnomalyDetectorFn.Arn
           RoleARN: !GetAtt IamRoleKinesisAnalytics.Arn
   ServerlessAnomalyApplication:
     Type: AWS::KinesisAnalytics::Application

@@ -2,9 +2,8 @@ import { differenceInSeconds } from 'date-fns';
 import { log } from './logger';
 import { cloudwatchClient, kinesisClient } from './clients';
 import * as config from './config';
-import { ResourceManager } from './resourceManager';
 import { getTimeRange } from './util';
-import { Resource } from './resource';
+import { Resource, ResourceManager } from './resource';
 import {
     DateRange, KinesisCostRecord, LambdaResponse, ResourceTag,
 } from './types';
