@@ -39,7 +39,7 @@ export class CostRecord {
         const pricingScheme: Pricing = await new this.Pricing().init();
         this._pricing = pricingScheme.calculateForDimension(costDimension);
 
-        log.info(`Cost record for ${this._resource.service.toUpperCase()}`, this._pricing);
+        log.info(`Cost record for ${this.resource.service.toUpperCase()}`, this.resource.id, this.pricing);
 
         return this;
     }

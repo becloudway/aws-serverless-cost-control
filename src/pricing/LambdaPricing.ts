@@ -4,6 +4,7 @@ import { PricingResult, ProductPricing } from '../types';
 import { LambdaDimension } from '../dimension';
 
 const groups = ['AWS-Lambda-Duration', 'AWS-Lambda-Requests'];
+let pricing: ProductPricing[];
 
 const getComputeUsage = (lambdaDimension: LambdaDimension): number => {
     const totalComputeSeconds = lambdaDimension.requestCount * (lambdaDimension.averageDuration / 1000);
@@ -37,7 +38,7 @@ export class LambdaPricing extends Pricing {
     }
 
     public async init(): Promise<LambdaPricing> {
-        const pricing: ProductPricing[] = await this.pricingClient.getProducts({
+        pricing = pricing || await this.pricingClient.getProducts({
             serviceCode: 'AWSLambda',
             region: this.region,
         });

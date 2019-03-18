@@ -7,7 +7,6 @@ import {
 } from 'aws-sdk/clients/cloudwatch';
 import { AWSClient } from './AWSClient';
 import { metrics } from '../config';
-import { log } from '../logger';
 import { DateRange } from '../types';
 
 export interface MetricsDimension {
@@ -109,7 +108,7 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
         return this.putMetricData(params);
     }
 
-    public putAnomalyMetricData(timestamp: Date, value: number) {
+    public putAnomalyMetricData(timestamp: Date, value: number): Promise<void> {
         const params: PutMetricDataInput = {
             Namespace: metrics.NAME_SPACE,
             MetricData: [{

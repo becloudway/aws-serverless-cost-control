@@ -1,7 +1,10 @@
 import { differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { Pricing } from './Pricing';
 import { DynamoDBDimension } from '../dimension';
-import { PricingResult } from '../types';
+import { PricingResult, ProductPricing } from '../types';
+
+let requestPricing: ProductPricing[];
+let storagePricing: ProductPricing[];
 
 export class DynamoDBPricing extends Pricing {
     private writeRequestsPrice: number;
@@ -13,14 +16,14 @@ export class DynamoDBPricing extends Pricing {
     private requestsPerReadWriteUnit: number;
 
     public async init(): Promise<DynamoDBPricing> {
-        const requestPricing = await this.pricingClient.getProducts({
+        requestPricing = requestPricing || await this.pricingClient.getProducts({
             serviceCode: 'AmazonDynamoDB',
             region: this.region,
             filters: [
                 { field: 'productFamily', value: 'Amazon DynamoDB PayPerRequest Throughput' },
             ],
         });
-        const storagePricing = await this.pricingClient.getProducts({
+        storagePricing = storagePricing || await this.pricingClient.getProducts({
             serviceCode: 'AmazonDynamoDB',
             region: this.region,
             filters: [

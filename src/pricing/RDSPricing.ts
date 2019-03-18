@@ -2,7 +2,11 @@ import { differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { Pricing } from './Pricing';
 import { RDSDimension } from '../dimension';
 import { window } from '../config';
-import { PricingResult } from '../types';
+import { PricingResult, ProductPricing } from '../types';
+
+let acuPricing: ProductPricing[];
+let iopsPricing: ProductPricing[];
+let storagePricing: ProductPricing[];
 
 export class RDSPricing extends Pricing {
     private monthlyStoragePrice: number;
@@ -12,7 +16,7 @@ export class RDSPricing extends Pricing {
     private iopsPrice: number;
 
     public async init(): Promise<RDSPricing> {
-        const acuPricing = await this.pricingClient.getProducts({
+        acuPricing = acuPricing || await this.pricingClient.getProducts({
             serviceCode: 'AmazonRDS',
             region: this.region,
             filters: [
@@ -20,7 +24,7 @@ export class RDSPricing extends Pricing {
             ],
         });
 
-        const iopsPricing = await this.pricingClient.getProducts({
+        iopsPricing = iopsPricing || await this.pricingClient.getProducts({
             serviceCode: 'AmazonRDS',
             region: this.region,
             filters: [
@@ -30,7 +34,7 @@ export class RDSPricing extends Pricing {
             ],
         });
 
-        const storagePricing = await this.pricingClient.getProducts({
+        storagePricing = storagePricing || await this.pricingClient.getProducts({
             serviceCode: 'AmazonRDS',
             region: this.region,
             filters: [
