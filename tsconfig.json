@@ -1,6 +1,6 @@
 {
-  "extends": "./tsconfig.basic.json",
-  "exclude": [
-    "test"
-  ]
+  "compilerOptions": {
+    "noImplicitAny": true
+  },
+  "extends": "./tsconfig.basic.json"
 }

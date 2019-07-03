@@ -4,7 +4,6 @@ import { PricingResult, ProductPricing } from '../types';
 import { LambdaDimension } from '../dimension';
 
 const groups = ['AWS-Lambda-Duration', 'AWS-Lambda-Requests'];
-let pricing: ProductPricing[];
 
 const getComputeUsage = (lambdaDimension: LambdaDimension): number => {
     const totalComputeSeconds = lambdaDimension.requestCount * (lambdaDimension.averageDuration / 1000);
@@ -12,11 +11,17 @@ const getComputeUsage = (lambdaDimension: LambdaDimension): number => {
 };
 
 export class LambdaPricing extends Pricing {
-    private computePrice: number;
+    private _computePrice: number;
 
-    private requestPrice: number;
+    private _requestPrice: number;
 
-    private pricing: ProductPricing[];
+    public get computePrice(): number {
+        return this._computePrice;
+    }
+
+    public get requestPrice(): number {
+        return this._requestPrice;
+    }
 
     public calculateForDimension(dimension: LambdaDimension): PricingResult {
         // by default, cost window is one minute and metric window 5 minutes
@@ -24,8 +29,8 @@ export class LambdaPricing extends Pricing {
         const costWindowSeconds = differenceInSeconds(dimension.end, dimension.start) / metricWindowMinutes;
 
         const computeUsage = getComputeUsage(dimension);
-        const computeCharges = computeUsage * this.computePrice / metricWindowMinutes;
-        const requestCharges = dimension.requestCount * this.requestPrice / metricWindowMinutes;
+        const computeCharges = computeUsage * this._computePrice / metricWindowMinutes;
+        const requestCharges = dimension.requestCount * this._requestPrice / metricWindowMinutes;
         const totalCost = computeCharges + requestCharges;
 
         return {
@@ -38,14 +43,12 @@ export class LambdaPricing extends Pricing {
     }
 
     public async init(): Promise<LambdaPricing> {
-        pricing = pricing || await this.pricingClient.getProducts({
-            serviceCode: 'AWSLambda',
-            region: this.region,
-        });
+        const pricing: ProductPricing[] = await this.pricingClient.getProducts({ serviceCode: 'AWSLambda', region: this.region });
+        if (!pricing) return this;
 
-        this.pricing = pricing.filter(pr => groups.includes(pr.group));
-        this.computePrice = this.pricing.find(p => p.unit === 'Second' || p.unit === 'seconds').pricePerUnit;
-        this.requestPrice = this.pricing.find(p => p.unit === 'Requests').pricePerUnit;
+        this._pricing = pricing.filter(pr => groups.includes(pr.group));
+        this._computePrice = this.getPricePerUnit('Second') || this.getPricePerUnit('seconds');
+        this._requestPrice = this.getPricePerUnit('Requests');
 
         return this;
     }

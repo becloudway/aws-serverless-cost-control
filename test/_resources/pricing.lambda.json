@@ -1,0 +1,170 @@
+[
+  {
+    "product": {
+      "productFamily": "Serverless",
+      "attributes": {
+        "servicecode": "AWSLambda",
+        "groupDescription": "Invocation call for a Lambda function",
+        "usagetype": "EU-Request",
+        "locationType": "AWS Region",
+        "location": "EU (Ireland)",
+        "servicename": "AWS Lambda",
+        "operation": "",
+        "group": "AWS-Lambda-Requests"
+      },
+      "sku": "B5V2RNHAWGVJBZD3"
+    },
+    "serviceCode": "AWSLambda",
+    "terms": {
+      "OnDemand": {
+        "B5V2RNHAWGVJBZD3.JRTCKXETXF": {
+          "priceDimensions": {
+            "B5V2RNHAWGVJBZD3.JRTCKXETXF.6YS6EN2CT7": {
+              "unit": "Requests",
+              "endRange": "Inf",
+              "description": "AWS Lambda - Total Requests - EU (Ireland)",
+              "appliesTo": [],
+              "rateCode": "B5V2RNHAWGVJBZD3.JRTCKXETXF.6YS6EN2CT7",
+              "beginRange": "0",
+              "pricePerUnit": {
+                "USD": "0.0000002000"
+              }
+            }
+          },
+          "sku": "B5V2RNHAWGVJBZD3",
+          "effectiveDate": "2019-04-01T00:00:00Z",
+          "offerTermCode": "JRTCKXETXF",
+          "termAttributes": {}
+        }
+      }
+    },
+    "version": "20190424183113",
+    "publicationDate": "2019-04-24T18:31:13Z"
+  },
+  {
+    "product": {
+      "productFamily": "Serverless",
+      "attributes": {
+        "servicecode": "AWSLambda",
+        "groupDescription": "Invocation call for a Lambda function",
+        "usagetype": "EU-Lambda-Edge-Request",
+        "locationType": "AWS Region",
+        "location": "EU (Ireland)",
+        "servicename": "AWS Lambda",
+        "operation": "",
+        "group": "AWS-Lambda-Edge-Requests"
+      },
+      "sku": "DDKXA6JP8NCVUFRZ"
+    },
+    "serviceCode": "AWSLambda",
+    "terms": {
+      "OnDemand": {
+        "DDKXA6JP8NCVUFRZ.JRTCKXETXF": {
+          "priceDimensions": {
+            "DDKXA6JP8NCVUFRZ.JRTCKXETXF.6YS6EN2CT7": {
+              "unit": "Request",
+              "endRange": "Inf",
+              "description": "AWS Lambda Edge - Total Requests - EU (Ireland)",
+              "appliesTo": [],
+              "rateCode": "DDKXA6JP8NCVUFRZ.JRTCKXETXF.6YS6EN2CT7",
+              "beginRange": "0",
+              "pricePerUnit": {
+                "USD": "0.0000006000"
+              }
+            }
+          },
+          "sku": "DDKXA6JP8NCVUFRZ",
+          "effectiveDate": "2019-04-01T00:00:00Z",
+          "offerTermCode": "JRTCKXETXF",
+          "termAttributes": {}
+        }
+      }
+    },
+    "version": "20190424183113",
+    "publicationDate": "2019-04-24T18:31:13Z"
+  },
+  {
+    "product": {
+      "productFamily": "Serverless",
+      "attributes": {
+        "servicecode": "AWSLambda",
+        "groupDescription": "Invocation duration weighted by memory assigned to function, measured in GB-s",
+        "usagetype": "EU-Lambda-GB-Second",
+        "locationType": "AWS Region",
+        "location": "EU (Ireland)",
+        "servicename": "AWS Lambda",
+        "operation": "",
+        "group": "AWS-Lambda-Duration"
+      },
+      "sku": "SGGKTWDV7PGMPPSJ"
+    },
+    "serviceCode": "AWSLambda",
+    "terms": {
+      "OnDemand": {
+        "SGGKTWDV7PGMPPSJ.JRTCKXETXF": {
+          "priceDimensions": {
+            "SGGKTWDV7PGMPPSJ.JRTCKXETXF.6YS6EN2CT7": {
+              "unit": "Second",
+              "endRange": "Inf",
+              "description": "AWS Lambda - Total Compute - EU (Ireland)",
+              "appliesTo": [],
+              "rateCode": "SGGKTWDV7PGMPPSJ.JRTCKXETXF.6YS6EN2CT7",
+              "beginRange": "0",
+              "pricePerUnit": {
+                "USD": "0.0000166667"
+              }
+            }
+          },
+          "sku": "SGGKTWDV7PGMPPSJ",
+          "effectiveDate": "2019-04-01T00:00:00Z",
+          "offerTermCode": "JRTCKXETXF",
+          "termAttributes": {}
+        }
+      }
+    },
+    "version": "20190424183113",
+    "publicationDate": "2019-04-24T18:31:13Z"
+  },
+  {
+    "product": {
+      "productFamily": "Serverless",
+      "attributes": {
+        "servicecode": "AWSLambda",
+        "groupDescription": "Invocation duration weighted by memory assigned to function, measured in GB-s",
+        "usagetype": "EU-Lambda-Edge-GB-Second",
+        "locationType": "AWS Region",
+        "location": "EU (Ireland)",
+        "servicename": "AWS Lambda",
+        "operation": "",
+        "group": "AWS-Lambda-Edge-Duration"
+      },
+      "sku": "WUTD23YJE55E5JCC"
+    },
+    "serviceCode": "AWSLambda",
+    "terms": {
+      "OnDemand": {
+        "WUTD23YJE55E5JCC.JRTCKXETXF": {
+          "priceDimensions": {
+            "WUTD23YJE55E5JCC.JRTCKXETXF.6YS6EN2CT7": {
+              "unit": "Lambda-GB-Second",
+              "endRange": "Inf",
+              "description": "AWS Lambda Edge - Total Compute - EU (Ireland)",
+              "appliesTo": [],
+              "rateCode": "WUTD23YJE55E5JCC.JRTCKXETXF.6YS6EN2CT7",
+              "beginRange": "0",
+              "pricePerUnit": {
+                "USD": "0.0000500100"
+              }
+            }
+          },
+          "sku": "WUTD23YJE55E5JCC",
+          "effectiveDate": "2019-04-01T00:00:00Z",
+          "offerTermCode": "JRTCKXETXF",
+          "termAttributes": {}
+        }
+      }
+    },
+    "version": "20190424183113",
+    "publicationDate": "2019-04-24T18:31:13Z"
+  }
+]

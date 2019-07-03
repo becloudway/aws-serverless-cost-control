@@ -1,18 +1,18 @@
 import { differenceInSeconds } from 'date-fns';
-import { log } from './logger';
-import { cloudwatchClient, kinesisClient } from './clients';
-import * as config from './config';
-import { getTimeRange } from './util';
-import { Resource, ResourceManager } from './resource';
+import { log } from '../logger';
+import {CloudwatchClient, cloudwatchClient, kinesisClient} from '../clients';
+import * as config from '../config';
+import { DateTime } from '../util';
+import { Resource, ResourceManager } from '../resource';
 import {
     DateRange, KinesisCostRecord, LambdaResponse, ResourceTag,
-} from './types';
-import { Pricing } from './pricing';
+} from '../types';
+import { Pricing } from '../pricing';
 
 export const handler = async (): Promise<LambdaResponse> => {
     try {
         const kinesisStream = process.env.KINESIS_STREAM_NAME;
-        const dateRange: DateRange = getTimeRange(config.metrics.METRIC_DELAY, config.metrics.METRIC_WINDOW);
+        const dateRange: DateRange = DateTime.getDateRange(config.metrics.METRIC_DELAY, config.metrics.METRIC_WINDOW);
         const resourceTag: ResourceTag = { key: config.TAGS.SCC_MONITOR_GROUP, value: 'true' };
 
         // RESOURCES
@@ -21,7 +21,7 @@ export const handler = async (): Promise<LambdaResponse> => {
             resourceManager.getResources(config.SERVICE_LAMBDA, config.RESOURCE_LAMBDA_FUNCTION),
             resourceManager.getResources(config.SERVICE_RDS, config.RESOURCE_RDS_CLUSTER_INSTANCE),
             resourceManager.getResources(config.SERVICE_DYNAMODB, config.RESOURCE_DYNAMODB_TABLE),
-        ])));
+        ]))).filter(i => i != null);
 
         const resourcesCost: number = (await Promise.all(resources.map(async (resource) => {
             const statistics = await cloudwatchClient.getCostMetricStatistics({
@@ -31,8 +31,7 @@ export const handler = async (): Promise<LambdaResponse> => {
                 range: dateRange,
             });
 
-            if (!statistics.Datapoints || statistics.Datapoints.length === 0) return 0;
-            return statistics.Datapoints.reduce((acc, curr) => acc + (curr.Average || 0), 0) / statistics.Datapoints.length;
+            return CloudwatchClient.calculateDatapointsAverage(statistics.Datapoints);
         }))).reduce((acc, curr) => acc + curr, 0);
 
         await kinesisClient.putRecord<KinesisCostRecord>(

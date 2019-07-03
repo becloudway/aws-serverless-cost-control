@@ -1,7 +1,7 @@
 import * as AWS from 'aws-sdk';
-import { GetProductsResponse } from 'aws-sdk/clients/pricing';
+import {GetProductsResponse, GetProductsRequest, PriceListItemJSON} from 'aws-sdk/clients/pricing';
 import { ProductPricing } from '../types';
-import { AWSClient } from './AWSClient';
+import { AWSClient, wrapCallback } from './AWSClient';
 import { regions } from '../config';
 
 export interface ProductFilter {
@@ -9,14 +9,37 @@ export interface ProductFilter {
     value: string;
 }
 
-export interface GetProductsRequest {
+export interface GetProductsParams {
     serviceCode: string;
     region: string;
     filters?: ProductFilter[];
 }
 
 export class PricingClient extends AWSClient<AWS.Pricing> {
-    public async getProducts({ serviceCode, region, filters = [] }: GetProductsRequest): Promise<ProductPricing[]> {
+    private static termType: string = 'OnDemand';
+
+    public static buildProductsFromPriceList(pricelist: any): ProductPricing {
+        try {
+            const terms = pricelist.terms && pricelist.terms[PricingClient.termType];
+
+            const { priceDimensions } = terms[Object.keys(terms)[0]];
+            const priceDimension = Object.keys(priceDimensions)
+                .map(key => priceDimensions[key])
+                .find(pd => pd.endRange === 'Inf');
+            const pricePerUnit = priceDimension.pricePerUnit.USD || 0;
+
+            return {
+                version: pricelist.version,
+                group: pricelist.product.attributes.group,
+                pricePerUnit: parseFloat(pricePerUnit),
+                unit: priceDimension.unit,
+            };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    public async getProducts({ serviceCode, region, filters = [] }: GetProductsParams): Promise<ProductPricing[]> {
         const termType = 'OnDemand';
         const defaultFilter = [
             {
@@ -37,29 +60,12 @@ export class PricingClient extends AWSClient<AWS.Pricing> {
             Value: f.value,
         })).concat(defaultFilter);
 
-        const products: GetProductsResponse = await new Promise((resolve, reject) => this.client.getProducts({
+        const products: GetProductsResponse = await wrapCallback<GetProductsRequest, GetProductsResponse>(this.client.getProducts, {
             Filters: productFilters,
             ServiceCode: serviceCode,
-        }, (err: Error, data: GetProductsResponse) => {
-            if (err) reject(err);
-            resolve(data);
-        }));
-
-        return products.PriceList.map((pr) => {
-            const pricelist: any = pr as any;
-            const terms = pricelist.terms[termType];
-            const { priceDimensions } = terms[Object.keys(terms)[0]];
-            const priceDimension = Object.keys(priceDimensions)
-                .map(key => priceDimensions[key])
-                .find(pd => pd.endRange === 'Inf');
-            const pricePerUnit = priceDimension.pricePerUnit.USD || 0;
-
-            return {
-                version: pricelist.version,
-                group: pricelist.product.attributes.group,
-                pricePerUnit: parseFloat(pricePerUnit),
-                unit: priceDimension.unit,
-            };
         });
+
+        if (!products || !products.PriceList) return [];
+        return products.PriceList.map(PricingClient.buildProductsFromPriceList).filter(i => i != null);
     }
 }

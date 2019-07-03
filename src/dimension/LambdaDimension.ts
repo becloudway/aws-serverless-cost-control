@@ -9,7 +9,7 @@ export class LambdaDimension extends Dimension {
 
     private _dataTransferOutInternetGb: number = 0;
 
-    private _dataTransferOutIntraREgionGb: number = 0;
+    private _dataTransferOutIntraRegionGb: number = 0;
 
     private _dataTransferOutInterRegionsGb: number = 0;
 
@@ -58,8 +58,8 @@ export class LambdaDimension extends Dimension {
         return this._dataTransferOutInternetGb;
     }
 
-    public get dataTransferOutIntraREgionGb(): number {
-        return this._dataTransferOutIntraREgionGb;
+    public get dataTransferOutIntraRegionGb(): number {
+        return this._dataTransferOutIntraRegionGb;
     }
 
     public get dataTransferOutInterRegionsGb(): number {

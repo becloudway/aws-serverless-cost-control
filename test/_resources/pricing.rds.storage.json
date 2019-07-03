@@ -1,0 +1,49 @@
+[
+  {
+    "product": {
+      "productFamily": "Database Storage",
+      "attributes": {
+        "volumeType": "General Purpose-Aurora",
+        "engineCode": "0",
+        "usagetype": "EU-Aurora:StorageUsage",
+        "locationType": "AWS Region",
+        "maxVolumeSize": "64 TB",
+        "databaseEngine": "Any",
+        "storageMedia": "SSD",
+        "servicecode": "AmazonRDS",
+        "deploymentOption": "Single-AZ",
+        "location": "EU (Ireland)",
+        "servicename": "Amazon Relational Database Service",
+        "operation": "CreateDBInstance",
+        "minVolumeSize": "10 GB"
+      },
+      "sku": "2QP44WDMF92K36SF"
+    },
+    "serviceCode": "AmazonRDS",
+    "terms": {
+      "OnDemand": {
+        "2QP44WDMF92K36SF.JRTCKXETXF": {
+          "priceDimensions": {
+            "2QP44WDMF92K36SF.JRTCKXETXF.6YS6EN2CT7": {
+              "unit": "GB-Mo",
+              "endRange": "Inf",
+              "description": "$0.11 per GB-month of consumed storage (Aurora)",
+              "appliesTo": [],
+              "rateCode": "2QP44WDMF92K36SF.JRTCKXETXF.6YS6EN2CT7",
+              "beginRange": "0",
+              "pricePerUnit": {
+                "USD": "0.1100000000"
+              }
+            }
+          },
+          "sku": "2QP44WDMF92K36SF",
+          "effectiveDate": "2019-06-01T00:00:00Z",
+          "offerTermCode": "JRTCKXETXF",
+          "termAttributes": {}
+        }
+      }
+    },
+    "version": "20190626172522",
+    "publicationDate": "2019-06-26T17:25:22Z"
+  }
+]

@@ -1,12 +1,12 @@
-import { log } from './logger';
-import { cloudwatchClient } from './clients';
+import { log } from '../logger';
+import { cloudwatchClient } from '../clients';
 import {
     DeliveryStatus,
     KinesisCostRecordWithAnomalyScore,
     KinesisStreamInputEvent,
     LambdaOutput,
     RecordResponse,
-} from './types';
+} from '../types';
 
 export const handler = async (event: KinesisStreamInputEvent): Promise<LambdaOutput> => {
     log.info('Received event', JSON.stringify(event, null, 2));
@@ -16,8 +16,8 @@ export const handler = async (event: KinesisStreamInputEvent): Promise<LambdaOut
             let costRecord: KinesisCostRecordWithAnomalyScore;
 
             try {
+                if (!r.data) throw new Error('No record data available');
                 const costRecordString: string = Buffer.from(r.data, 'base64').toString('utf-8');
-                if (!costRecordString) throw new Error('No record data available');
                 costRecord = JSON.parse(costRecordString);
 
                 await cloudwatchClient.putAnomalyMetricData(new Date(costRecord.recordTimestamp), costRecord.ANOMALY_SCORE);

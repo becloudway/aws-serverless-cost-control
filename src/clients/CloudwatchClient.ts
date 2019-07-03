@@ -1,11 +1,14 @@
 import * as AWS from 'aws-sdk';
 import {
+    Datapoint,
     Dimension,
     GetMetricStatisticsInput,
-    GetMetricStatisticsOutput,
-    PutMetricDataInput,
+    GetMetricStatisticsOutput, Namespace, Period,
+    PutMetricDataInput, Statistics,
 } from 'aws-sdk/clients/cloudwatch';
-import { AWSClient } from './AWSClient';
+import {
+    AWSClient, wrapCallback, wrapCallbackVoid,
+} from './AWSClient';
 import { metrics } from '../config';
 import { DateRange } from '../types';
 
@@ -15,13 +18,13 @@ export interface MetricsDimension {
 }
 
 export interface GetMetricStatisticsParams {
-    nameSpace: string;
+    nameSpace: Namespace;
     metricName: string;
     dimensions?: MetricsDimension[];
     startTime: Date;
     endTime: Date;
-    period: number;
-    statistics: string[];
+    period: Period;
+    statistics: Statistics;
 }
 
 export interface PutCostMetricStatisticsParams {
@@ -58,12 +61,7 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
             Period: period,
             Statistics: statistics,
         };
-        return new Promise((resolve, reject) => {
-            this.client.getMetricStatistics(params, (err: Error, data: GetMetricStatisticsOutput) => {
-                if (err) reject(err);
-                resolve(data);
-            });
-        });
+        return wrapCallback<GetMetricStatisticsInput, GetMetricStatisticsOutput>(this.client.getMetricStatistics, params);
     }
 
     public getCostMetricStatistics(params: GetCostMetricStatisticsParams): Promise<GetMetricStatisticsOutput> {
@@ -78,7 +76,7 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
         });
     }
 
-    private static buildCostDimensions(service: string, resourceId: string): Dimension[] {
+    public static buildCostDimensions(service: string, resourceId: string): Dimension[] {
         return [
             {
                 Name: metrics.DIMENSIONS.RESOURCE_ID,
@@ -105,7 +103,7 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
             }],
         };
 
-        return this.putMetricData(params);
+        return wrapCallbackVoid<PutMetricDataInput>(this.client.putMetricData, params);
     }
 
     public putAnomalyMetricData(timestamp: Date, value: number): Promise<void> {
@@ -119,15 +117,16 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
             }],
         };
 
-        return this.putMetricData(params);
+        return wrapCallbackVoid<PutMetricDataInput>(this.client.putMetricData, params);
     }
 
-    private putMetricData(params: PutMetricDataInput): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            this.client.putMetricData(params, (err: Error) => {
-                if (err) reject(err);
-                resolve();
-            });
-        });
+    public static calculateDatapointsAverage(datapoints?: Datapoint[]): number {
+        if (!datapoints || datapoints.length === 0) return 0;
+        return datapoints.reduce((acc, curr) => acc + (curr.Average || 0), 0) / datapoints.length;
+    }
+
+    public static calculateDatapointsSum(datapoints?: Datapoint[]): number {
+        if (!datapoints || datapoints.length === 0) return 0;
+        return datapoints.reduce((acc, curr) => acc + (curr.Sum || 0), 0);
     }
 }

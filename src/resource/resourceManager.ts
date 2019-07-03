@@ -32,6 +32,8 @@ export class ResourceManager {
             resourceTypeFilters: RESOURCE_MAP,
         });
 
+        if (!taggedResources) return this;
+
         this.resources = taggedResources.ResourceTagMappingList.map((res) => {
             const arn = res.ResourceARN;
             const tags = res.Tags;
@@ -65,6 +67,7 @@ export class ResourceManager {
     }
 
     public getResource(service: string, resourceId: string): Resource {
-        return this.resources.find(r => r.service === service && r.id === resourceId);
+        const resource: Resource = this.resources.find(r => r.service === service && r.id === resourceId);
+        return resource || null;
     }
 }

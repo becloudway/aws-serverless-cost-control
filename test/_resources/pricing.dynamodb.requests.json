@@ -1,0 +1,128 @@
+[
+  {
+    "product": {
+      "productFamily": "Amazon DynamoDB PayPerRequest Throughput",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "groupDescription": "DynamoDB PayPerRequest Read Request Units",
+        "usagetype": "EU-ReadRequestUnits",
+        "locationType": "AWS Region",
+        "location": "EU (Ireland)",
+        "servicename": "Amazon DynamoDB",
+        "operation": "PayPerRequestThroughput",
+        "group": "DDB-ReadUnits"
+      },
+      "sku": "3ERQSZWPAMX2JWHN"
+    },
+    "serviceCode": "AmazonDynamoDB",
+    "terms": {
+      "OnDemand": {
+        "3ERQSZWPAMX2JWHN.JRTCKXETXF": {
+          "priceDimensions": {
+            "3ERQSZWPAMX2JWHN.JRTCKXETXF.6YS6EN2CT7": {
+              "unit": "ReadRequestUnits",
+              "endRange": "Inf",
+              "description": "$0.2827 per million read request units (EU (Ireland))",
+              "appliesTo": [],
+              "rateCode": "3ERQSZWPAMX2JWHN.JRTCKXETXF.6YS6EN2CT7",
+              "beginRange": "0",
+              "pricePerUnit": {
+                "USD": "0.0000002830"
+              }
+            }
+          },
+          "sku": "3ERQSZWPAMX2JWHN",
+          "effectiveDate": "2019-06-01T00:00:00Z",
+          "offerTermCode": "JRTCKXETXF",
+          "termAttributes": {}
+        }
+      }
+    },
+    "version": "20190610172212",
+    "publicationDate": "2019-06-10T17:22:12Z"
+  },
+  {
+    "product": {
+      "productFamily": "Amazon DynamoDB PayPerRequest Throughput",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "groupDescription": "DynamoDB PayPerRequest Write Request Units",
+        "usagetype": "EU-WriteRequestUnits",
+        "locationType": "AWS Region",
+        "location": "EU (Ireland)",
+        "servicename": "Amazon DynamoDB",
+        "operation": "PayPerRequestThroughput",
+        "group": "DDB-WriteUnits"
+      },
+      "sku": "F4EZE5SAMS3D49NJ"
+    },
+    "serviceCode": "AmazonDynamoDB",
+    "terms": {
+      "OnDemand": {
+        "F4EZE5SAMS3D49NJ.JRTCKXETXF": {
+          "priceDimensions": {
+            "F4EZE5SAMS3D49NJ.JRTCKXETXF.6YS6EN2CT7": {
+              "unit": "WriteRequestUnits",
+              "endRange": "Inf",
+              "description": "$1.4135 per million write request units (EU (Ireland))",
+              "appliesTo": [],
+              "rateCode": "F4EZE5SAMS3D49NJ.JRTCKXETXF.6YS6EN2CT7",
+              "beginRange": "0",
+              "pricePerUnit": {
+                "USD": "0.0000014135"
+              }
+            }
+          },
+          "sku": "F4EZE5SAMS3D49NJ",
+          "effectiveDate": "2019-06-01T00:00:00Z",
+          "offerTermCode": "JRTCKXETXF",
+          "termAttributes": {}
+        }
+      }
+    },
+    "version": "20190610172212",
+    "publicationDate": "2019-06-10T17:22:12Z"
+  },
+  {
+    "product": {
+      "productFamily": "Amazon DynamoDB PayPerRequest Throughput",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "groupDescription": "DynamoDB PayPerRequest Replicated Write Request Units",
+        "usagetype": "EU-ReplWriteRequestUnits",
+        "locationType": "AWS Region",
+        "location": "EU (Ireland)",
+        "servicename": "Amazon DynamoDB",
+        "operation": "PayPerRequestThroughput",
+        "group": "DDB-ReplicatedWriteUnits"
+      },
+      "sku": "Y8RETJA3NHS97536"
+    },
+    "serviceCode": "AmazonDynamoDB",
+    "terms": {
+      "OnDemand": {
+        "Y8RETJA3NHS97536.JRTCKXETXF": {
+          "priceDimensions": {
+            "Y8RETJA3NHS97536.JRTCKXETXF.6YS6EN2CT7": {
+              "unit": "ReplicatedWriteRequestUnits",
+              "endRange": "Inf",
+              "description": "$2.1202 per million replicated write request units (EU (Ireland))",
+              "appliesTo": [],
+              "rateCode": "Y8RETJA3NHS97536.JRTCKXETXF.6YS6EN2CT7",
+              "beginRange": "0",
+              "pricePerUnit": {
+                "USD": "0.0000021202"
+              }
+            }
+          },
+          "sku": "Y8RETJA3NHS97536",
+          "effectiveDate": "2019-06-01T00:00:00Z",
+          "offerTermCode": "JRTCKXETXF",
+          "termAttributes": {}
+        }
+      }
+    },
+    "version": "20190610172212",
+    "publicationDate": "2019-06-10T17:22:12Z"
+  }
+]

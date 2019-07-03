@@ -23,7 +23,7 @@ export interface PricingResult {
 
 export interface ProductPricing {
     version: string;
-    group: string;
+    group?: string;
     pricePerUnit: number;
     unit: string;
 }
@@ -60,7 +60,7 @@ export interface LambdaDeliveryRecordMetadata {
     retryHint: number;
 }
 
-interface KinesisStreamRecord {
+export interface KinesisStreamRecord {
     recordId: string;
     lambdaDeliveryRecordMetadata: LambdaDeliveryRecordMetadata;
     data: string;

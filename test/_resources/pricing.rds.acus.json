@@ -1,0 +1,44 @@
+[
+  {
+    "product": {
+      "productFamily": "Serverless",
+      "attributes": {
+        "engineCode": "16",
+        "servicecode": "AmazonRDS",
+        "usagetype": "EU-Aurora:ServerlessUsage",
+        "locationType": "AWS Region",
+        "location": "EU (Ireland)",
+        "servicename": "Amazon Relational Database Service",
+        "operation": "CreateDBInstance:0016",
+        "databaseEngine": "Aurora MySQL"
+      },
+      "sku": "XFWXBS86Q67SPJTZ"
+    },
+    "serviceCode": "AmazonRDS",
+    "terms": {
+      "OnDemand": {
+        "XFWXBS86Q67SPJTZ.JRTCKXETXF": {
+          "priceDimensions": {
+            "XFWXBS86Q67SPJTZ.JRTCKXETXF.6YS6EN2CT7": {
+              "unit": "ACU-Hr",
+              "endRange": "Inf",
+              "description": "$0.07 per Aurora Capacity Unit hour running Amazon Aurora MySQL Serverless",
+              "appliesTo": [],
+              "rateCode": "XFWXBS86Q67SPJTZ.JRTCKXETXF.6YS6EN2CT7",
+              "beginRange": "0",
+              "pricePerUnit": {
+                "USD": "0.0700000000"
+              }
+            }
+          },
+          "sku": "XFWXBS86Q67SPJTZ",
+          "effectiveDate": "2019-06-01T00:00:00Z",
+          "offerTermCode": "JRTCKXETXF",
+          "termAttributes": {}
+        }
+      }
+    },
+    "version": "20190626172522",
+    "publicationDate": "2019-06-26T17:25:22Z"
+  }
+]

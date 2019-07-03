@@ -1,0 +1,46 @@
+[
+  {
+    "product": {
+      "productFamily": "System Operation",
+      "attributes": {
+        "engineCode": "0",
+        "servicecode": "AmazonRDS",
+        "groupDescription": "Input/Output Operation",
+        "usagetype": "EU-Aurora:StorageIOUsage",
+        "locationType": "AWS Region",
+        "location": "EU (Ireland)",
+        "servicename": "Amazon Relational Database Service",
+        "operation": "CreateDBInstance",
+        "databaseEngine": "Any",
+        "group": "Aurora I/O Operation"
+      },
+      "sku": "XCTJ3WPE3TSBCKNV"
+    },
+    "serviceCode": "AmazonRDS",
+    "terms": {
+      "OnDemand": {
+        "XCTJ3WPE3TSBCKNV.JRTCKXETXF": {
+          "priceDimensions": {
+            "XCTJ3WPE3TSBCKNV.JRTCKXETXF.6YS6EN2CT7": {
+              "unit": "IOs",
+              "endRange": "Inf",
+              "description": "$0.22 per 1 million I/O requests (Aurora)",
+              "appliesTo": [],
+              "rateCode": "XCTJ3WPE3TSBCKNV.JRTCKXETXF.6YS6EN2CT7",
+              "beginRange": "0",
+              "pricePerUnit": {
+                "USD": "0.0000002200"
+              }
+            }
+          },
+          "sku": "XCTJ3WPE3TSBCKNV",
+          "effectiveDate": "2019-06-01T00:00:00Z",
+          "offerTermCode": "JRTCKXETXF",
+          "termAttributes": {}
+        }
+      }
+    },
+    "version": "20190626172522",
+    "publicationDate": "2019-06-26T17:25:22Z"
+  }
+]

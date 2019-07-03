@@ -8,6 +8,7 @@ export abstract class Dimension {
     private _resource: Resource;
 
     public constructor(resource: Resource, start: Date, end: Date) {
+        if (start > end) throw new Error('Cannot instantiate dimension. Start date cannot be later than end date');
         this._start = start;
         this._end = end;
         this._resource = resource;

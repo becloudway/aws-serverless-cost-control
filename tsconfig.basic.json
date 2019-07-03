@@ -1,28 +1,16 @@
 {
     "compilerOptions": {
         "module": "commonjs",
+        "moduleResolution": "node",
         "target": "es2017",
         "baseUrl": ".",
         "outDir": "./lib",
         "sourceMap": true,
-        "noImplicitAny": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "paths": {
-            "@controllers": ["controllers"],
-            "@interfaces": ["interfaces"],
-            "@serializers": ["serializers"],
-            "@services": ["services"],
-            "@validators": ["validators"],
-            "@entities": ["entities"],
-            "@middleware": ["middleware"],
-            "@dal": ["dal"],
-            "@errors": ["errors"],
-            "@logger": ["logger"]
-        }
+        "resolveJsonModule": true
     },
     "exclude": [
-        "node_modules", "lib"
-    ],
-    "moduleResolution": "node"
+        "node_modules", "lib", "test"
+    ]
 }

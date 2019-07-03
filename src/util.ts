@@ -1,14 +1,21 @@
 import { subMinutes } from 'date-fns';
 import { DateRange } from './types';
 
-const round = (num: number, decimalPoints: number): number => Math.round(num * (10 ** decimalPoints)) / (10 ** decimalPoints);
-const getTimeRange = (offsetMinutes: number, rangeMinutes: number, baseDate = Date.now()): DateRange => {
-    const end = subMinutes(baseDate, offsetMinutes);
-    const start = subMinutes(end, rangeMinutes);
-    return { start, end };
-};
+class DateTime {
+    public static getDateRange(offsetMinutes: number, rangeMinutes: number, baseDate = Date.now()): DateRange {
+        const end = subMinutes(baseDate, offsetMinutes);
+        const start = subMinutes(end, rangeMinutes);
+        return { start, end };
+    }
+}
+
+class Numbers {
+    public static round(num: number, decimalPoints: number): number {
+        return Math.round(num * (10 ** decimalPoints)) / (10 ** decimalPoints);
+    }
+}
 
 export {
-    round,
-    getTimeRange,
+    DateTime,
+    Numbers,
 };

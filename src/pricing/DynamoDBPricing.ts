@@ -2,28 +2,37 @@ import { differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { Pricing } from './Pricing';
 import { DynamoDBDimension } from '../dimension';
 import { PricingResult, ProductPricing } from '../types';
-
-let requestPricing: ProductPricing[];
-let storagePricing: ProductPricing[];
+import { window } from '../config';
 
 export class DynamoDBPricing extends Pricing {
-    private writeRequestsPrice: number;
+    private _writeRequestsPrice: number;
 
-    private readRequestsPrice: number;
+    private _readRequestsPrice: number;
 
-    private monthlyStoragePrice: number;
+    private _monthlyStoragePrice: number;
 
-    private requestsPerReadWriteUnit: number;
+    public get writeRequestsPrice(): number {
+        return this._writeRequestsPrice;
+    }
+
+    public get readRequestsPrice(): number {
+        return this._readRequestsPrice;
+    }
+
+    public get monthlyStoragePrice(): number {
+        return this._monthlyStoragePrice;
+    }
 
     public async init(): Promise<DynamoDBPricing> {
-        requestPricing = requestPricing || await this.pricingClient.getProducts({
+        const requestPricing: ProductPricing[] = await this.pricingClient.getProducts({
             serviceCode: 'AmazonDynamoDB',
             region: this.region,
             filters: [
                 { field: 'productFamily', value: 'Amazon DynamoDB PayPerRequest Throughput' },
             ],
         });
-        storagePricing = storagePricing || await this.pricingClient.getProducts({
+
+        const storagePricing: ProductPricing[] = await this.pricingClient.getProducts({
             serviceCode: 'AmazonDynamoDB',
             region: this.region,
             filters: [
@@ -32,12 +41,15 @@ export class DynamoDBPricing extends Pricing {
             ],
         });
 
-        this.requestsPerReadWriteUnit = 10 ** 9;
 
+        if (!requestPricing) return this;
+        this._pricing = requestPricing;
+        this._writeRequestsPrice = this.getPricePerUnit('WriteRequestUnits');
+        this._readRequestsPrice = this.getPricePerUnit('ReadRequestUnits');
 
-        this.writeRequestsPrice = requestPricing.find(p => p.unit === 'WriteRequestUnits').pricePerUnit;
-        this.readRequestsPrice = requestPricing.find(p => p.unit === 'ReadRequestUnits').pricePerUnit;
-        this.monthlyStoragePrice = storagePricing.find(p => p.unit === 'GB-Mo').pricePerUnit;
+        if (!storagePricing) return this;
+        this._pricing = [...this._pricing, ...storagePricing];
+        this._monthlyStoragePrice = this.getPricePerUnit('GB-Mo');
 
         return this;
     }
@@ -47,9 +59,10 @@ export class DynamoDBPricing extends Pricing {
         const metricWindowMinutes = differenceInMinutes(dimension.end, dimension.start);
         const costWindowSeconds = differenceInSeconds(dimension.end, dimension.start) / metricWindowMinutes;
 
-        const writeCostPerMinute = dimension.writeCapacityUnits * (this.writeRequestsPrice / this.requestsPerReadWriteUnit) / metricWindowMinutes;
-        const readCostPerMinute = dimension.readCapacityUnits * (this.readRequestsPrice / this.requestsPerReadWriteUnit) / metricWindowMinutes;
-        const storageCost = (dimension.storageSizeBytes / (10 ** 9)) * this.monthlyStoragePrice / metricWindowMinutes / 60;
+        // read and write CU's are averaged
+        const readCostPerMinute = dimension.readCapacityUnits * this._readRequestsPrice;
+        const writeCostPerMinute = dimension.writeCapacityUnits * this._writeRequestsPrice;
+        const storageCost = ((dimension.storageSizeBytes + dimension.writeCapacityUnits * 4 * 1000) / (10 ** 9)) * this._monthlyStoragePrice / window.MONTHLY / 60;
         const totalCost = writeCostPerMinute + readCostPerMinute + storageCost;
 
         return {

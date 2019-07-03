@@ -20,11 +20,23 @@ export class RDSDimension extends Dimension {
         return this._auroraCapacityUnits;
     }
 
+    public set auroraCapacityUnits(value: number) {
+        this._auroraCapacityUnits = value;
+    }
+
     public get storedGiBs(): number {
         return this._storedGiBs;
     }
 
+    public set storedGiBs(value: number) {
+        this._storedGiBs = value;
+    }
+
     public get ioRequests(): number {
         return this._ioRequests;
+    }
+
+    public set ioRequests(value: number) {
+        this._ioRequests = value;
     }
 }

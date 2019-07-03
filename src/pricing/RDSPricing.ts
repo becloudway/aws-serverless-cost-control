@@ -4,19 +4,17 @@ import { RDSDimension } from '../dimension';
 import { window } from '../config';
 import { PricingResult, ProductPricing } from '../types';
 
-let acuPricing: ProductPricing[];
-let iopsPricing: ProductPricing[];
-let storagePricing: ProductPricing[];
+const ONE_MILLION = 10 ** 6;
 
 export class RDSPricing extends Pricing {
-    private monthlyStoragePrice: number;
+    private _monthlyStoragePrice: number;
 
-    private hourlyACUPrice: number;
+    private _hourlyACUPrice: number;
 
-    private iopsPrice: number;
+    private _iopsPrice: number;
 
     public async init(): Promise<RDSPricing> {
-        acuPricing = acuPricing || await this.pricingClient.getProducts({
+        const acuPricing: ProductPricing[] = await this.pricingClient.getProducts({
             serviceCode: 'AmazonRDS',
             region: this.region,
             filters: [
@@ -24,7 +22,7 @@ export class RDSPricing extends Pricing {
             ],
         });
 
-        iopsPricing = iopsPricing || await this.pricingClient.getProducts({
+        const iopsPricing: ProductPricing[] = await this.pricingClient.getProducts({
             serviceCode: 'AmazonRDS',
             region: this.region,
             filters: [
@@ -34,7 +32,7 @@ export class RDSPricing extends Pricing {
             ],
         });
 
-        storagePricing = storagePricing || await this.pricingClient.getProducts({
+        const storagePricing: ProductPricing[] = await this.pricingClient.getProducts({
             serviceCode: 'AmazonRDS',
             region: this.region,
             filters: [
@@ -44,9 +42,18 @@ export class RDSPricing extends Pricing {
             ],
         });
 
-        this.monthlyStoragePrice = storagePricing[0] && storagePricing[0].pricePerUnit;
-        this.hourlyACUPrice = acuPricing[0] && acuPricing[0].pricePerUnit;
-        this.iopsPrice = iopsPricing[0] && iopsPricing[0].pricePerUnit;
+        if (storagePricing) {
+            this._pricing = [...this._pricing, ...storagePricing];
+            this._monthlyStoragePrice = this.getPricePerUnit('GB-Mo');
+        }
+        if (acuPricing) {
+            this._pricing = [...this._pricing, ...acuPricing];
+            this._hourlyACUPrice = this.getPricePerUnit('ACU-Hr');
+        }
+        if (iopsPricing) {
+            this._pricing = [...this._pricing, ...iopsPricing];
+            this._iopsPrice = this.getPricePerUnit('IOs');
+        }
 
         return this;
     }
@@ -56,9 +63,9 @@ export class RDSPricing extends Pricing {
         const metricWindowMinutes = differenceInMinutes(dimension.end, dimension.start);
         const costWindowSeconds = differenceInSeconds(dimension.end, dimension.start) / metricWindowMinutes;
 
-        const ACUCost = (dimension.auroraCapacityUnits * this.hourlyACUPrice) / 60; // cost per minute
-        const storageCost = (dimension.storedGiBs * this.monthlyStoragePrice) / (10 ** 9) / window.MONTHLY / 60; // cost per minute
-        const iopsCost = dimension.ioRequests * this.iopsPrice / metricWindowMinutes;
+        const ACUCost = (dimension.auroraCapacityUnits * this._hourlyACUPrice) / 60; // cost per minute
+        const storageCost = (dimension.storedGiBs * this._monthlyStoragePrice) / window.MONTHLY / 60; // cost per minute
+        const iopsCost = dimension.ioRequests * this._iopsPrice / ONE_MILLION / metricWindowMinutes;
         const totalCost = ACUCost + storageCost + iopsCost;
 
         return {
@@ -72,5 +79,17 @@ export class RDSPricing extends Pricing {
                 ACUCharges: ACUCost,
             },
         };
+    }
+
+    public get monthlyStoragePrice(): number {
+        return this._monthlyStoragePrice;
+    }
+
+    public get hourlyACUPrice(): number {
+        return this._hourlyACUPrice;
+    }
+
+    public get iopsPrice(): number {
+        return this._iopsPrice;
     }
 }

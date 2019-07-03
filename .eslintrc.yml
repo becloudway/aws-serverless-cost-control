@@ -40,3 +40,4 @@ settings:
         - ".jsx"
         - ".ts"
         - ".tsx"
+    typescript: {}

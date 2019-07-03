@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/interface-name-prefix */
 import { Resource } from '../resource';
 import {
     Dimension, DynamoDBDimension, LambdaDimension, RDSDimension,
@@ -19,19 +20,27 @@ dimensions.set(SERVICE_DYNAMODB, DynamoDBDimension);
 dimensions.set(SERVICE_LAMBDA, LambdaDimension);
 dimensions.set(SERVICE_RDS, RDSDimension);
 
+interface IPricing {
+    new(): Pricing;
+}
+
+interface IDimension {
+    new(...params: any[]): Dimension;
+}
+
 export class CostRecord {
     private _resource: Resource;
 
-    private Pricing: new() => Pricing;
+    private Pricing: IPricing;
 
-    private Dimension: new(...params: any[]) => Dimension;
+    private Dimension: IDimension;
 
     private _pricing: PricingResult;
 
-    public constructor(resource: Resource) {
+    public constructor(resource: Resource, pricing?: IPricing, dimension?: IDimension) {
         this._resource = resource;
-        this.Pricing = pricings.get(resource.service);
-        this.Dimension = dimensions.get(resource.service);
+        this.Pricing = pricing || pricings.get(resource.service);
+        this.Dimension = dimension || dimensions.get(resource.service);
     }
 
     public async fetch({ start, end }: DateRange): Promise<CostRecord> {

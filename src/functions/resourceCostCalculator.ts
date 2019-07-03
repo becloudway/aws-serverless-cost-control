@@ -1,14 +1,14 @@
-import * as config from './config';
-import { DateRange, LambdaResponse, ResourceTag } from './types';
-import { cloudwatchClient, snsClient } from './clients';
-import { log } from './logger';
-import { ResourceManager } from './resource';
-import { getTimeRange } from './util';
-import { CostRecord } from './pricing';
+import * as config from '../config';
+import { DateRange, LambdaResponse, ResourceTag } from '../types';
+import { cloudwatchClient, snsClient } from '../clients';
+import { log } from '../logger';
+import { ResourceManager } from '../resource';
+import { DateTime } from '../util';
+import { CostRecord } from '../pricing';
 
 export const handler = async (): Promise<LambdaResponse> => {
     try {
-        const dateRange: DateRange = getTimeRange(config.metrics.METRIC_DELAY, config.metrics.METRIC_WINDOW);
+        const dateRange: DateRange = DateTime.getDateRange(config.metrics.METRIC_DELAY, config.metrics.METRIC_WINDOW);
         const resourceTag: ResourceTag = {
             key: config.TAGS.SCC_MONITOR_GROUP,
             value: 'true',
@@ -20,7 +20,7 @@ export const handler = async (): Promise<LambdaResponse> => {
             resourceManager.getResources(config.SERVICE_LAMBDA, config.RESOURCE_LAMBDA_FUNCTION),
             resourceManager.getResources(config.SERVICE_RDS, config.RESOURCE_RDS_CLUSTER_INSTANCE),
             resourceManager.getResources(config.SERVICE_DYNAMODB, config.RESOURCE_DYNAMODB_TABLE),
-        ])));
+        ]))).filter(i => i != null);
         const costRecords = await Promise.all(resources.map(resource => new CostRecord(resource).fetch(dateRange)));
 
         // TRIGGER NOTIFICATIONS IF NEEDED

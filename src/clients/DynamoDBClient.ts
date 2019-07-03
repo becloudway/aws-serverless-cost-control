@@ -1,61 +1,62 @@
 import * as AWS from 'aws-sdk';
-import { DescribeTableOutput } from 'aws-sdk/clients/dynamodb';
-import { AWSClient } from './AWSClient';
+import { DescribeTableInput, DescribeTableOutput, UpdateTableInput } from 'aws-sdk/clients/dynamodb';
+import { Datapoint } from 'aws-sdk/clients/cloudwatch';
+import { AWSClient, wrapCallback, wrapCallbackVoid } from './AWSClient';
 import { metrics } from '../config';
-import { GetMetricStatisticsParams } from './CloudwatchClient';
-import { Resource } from '../resource/resource';
+import { CloudwatchClient, GetMetricStatisticsParams } from './CloudwatchClient';
+import { Resource } from '../resource';
+
+type MetricName = 'ConsumedWriteCapacityUnits' | 'ConsumedReadCapacityUnits';
 
 export class DynamoDBClient extends AWSClient<AWS.DynamoDB> {
     public async describeTable(tableName: string): Promise<DescribeTableOutput> {
-        return new Promise((resolve, reject) => this.client.describeTable({
-            TableName: tableName,
-        }, (err: Error, data: DescribeTableOutput) => {
-            if (err) reject(err);
-            resolve(data);
-        }));
+        return wrapCallback<DescribeTableInput, DescribeTableOutput>(this.client.describeTable, { TableName: tableName });
     }
 
     public async getWriteCapacityUnits(resource: Resource, start: Date, end: Date): Promise<number> {
-        const metricStatisticsParams: GetMetricStatisticsParams = {
-            nameSpace: 'AWS/DynamoDB',
-            metricName: 'ConsumedWriteCapacityUnits',
-            startTime: start,
-            endTime: end,
-            period: 60 * metrics.METRIC_WINDOW,
-            statistics: ['Average'],
-        };
-        const statistics = await this.clwClient.getMetricStatistics(metricStatisticsParams);
+        const metricStatisticsParams: GetMetricStatisticsParams = DynamoDBClient.buildMetricStatisticsParams(
+            'ConsumedWriteCapacityUnits',
+            resource,
+            start,
+            end,
+        );
 
-        if (!statistics.Datapoints || statistics.Datapoints.length === 0) return 0;
-        return statistics.Datapoints.reduce((acc, curr) => acc + (curr.Average || 0), 0) / statistics.Datapoints.length;
+        const statistics = await this.clwClient.getMetricStatistics(metricStatisticsParams);
+        return CloudwatchClient.calculateDatapointsAverage(statistics.Datapoints);
     }
 
     public async getReadCapacityUnits(resource: Resource, start: Date, end: Date): Promise<number> {
-        const statistics = await this.clwClient.getMetricStatistics({
-            nameSpace: 'AWS/DynamoDB',
-            metricName: 'ConsumedReadCapacityUnits',
-            dimensions: [{ Name: 'TableName', Value: resource.id }],
-            startTime: start,
-            endTime: end,
-            period: 60 * metrics.METRIC_WINDOW,
-            statistics: ['Average'],
-        });
+        const metricStatisticsParams: GetMetricStatisticsParams = DynamoDBClient.buildMetricStatisticsParams(
+            'ConsumedReadCapacityUnits',
+            resource,
+            start,
+            end,
+        );
 
-        if (!statistics.Datapoints || statistics.Datapoints.length === 0) return 0;
-        return statistics.Datapoints.reduce((acc, curr) => acc + (curr.Average || 0), 0) / statistics.Datapoints.length;
+        const statistics = await this.clwClient.getMetricStatistics(metricStatisticsParams);
+        return CloudwatchClient.calculateDatapointsAverage(statistics.Datapoints);
     }
 
     public async throttle(resourceId: string, { readCapacityUnits = 1, writeCapacityUnits = 1 } = {}): Promise<void> {
-        return new Promise<void>((resolve, reject) => this.client.updateTable({
+        return wrapCallbackVoid<UpdateTableInput>(this.client.updateTable, {
             TableName: resourceId,
             BillingMode: 'PROVISIIONED',
             ProvisionedThroughput: {
                 ReadCapacityUnits: readCapacityUnits,
                 WriteCapacityUnits: writeCapacityUnits,
             },
-        }, (err: Error) => {
-            if (err) reject(err);
-            return resolve();
-        }));
+        });
+    }
+
+    private static buildMetricStatisticsParams(metricName: MetricName, resource: Resource, start: Date, end: Date): GetMetricStatisticsParams {
+        return {
+            nameSpace: 'AWS/DynamoDB',
+            metricName,
+            dimensions: [{ Name: 'TableName', Value: resource.id }],
+            startTime: start,
+            endTime: end,
+            period: 60 * metrics.METRIC_WINDOW,
+            statistics: ['Average'],
+        };
     }
 }

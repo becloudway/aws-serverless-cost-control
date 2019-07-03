@@ -1,9 +1,9 @@
 import { SNSEvent } from 'aws-lambda';
-import { SERVICE_DYNAMODB, SERVICE_LAMBDA, SERVICE_RDS } from './config';
-import { dynamodbClient, lambdaClient, rdsClient } from './clients';
-import { log } from './logger';
-import { Resource } from './resource';
-import { LambdaResponse } from './types';
+import { SERVICE_DYNAMODB, SERVICE_LAMBDA, SERVICE_RDS } from '../config';
+import { dynamodbClient, lambdaClient, rdsClient } from '../clients';
+import { log } from '../logger';
+import { Resource } from '../resource';
+import { LambdaResponse } from '../types';
 
 const parseActionablesFromEvent = ({ Records }: SNSEvent): Resource[] => Records.map((record) => {
     const attributes = record.Sns.MessageAttributes;
@@ -23,6 +23,9 @@ export const handler = async (event: SNSEvent): Promise<LambdaResponse> => {
     try {
         await Promise.all(parseActionablesFromEvent(event).map(async (actionable) => {
             log.info(`Throttling ${actionable.service} resource ${actionable.resourceId}`);
+            if (!actions.has(actionable.service)) {
+                throw new Error('Unknown service');
+            }
             await actions.get(actionable.service)(actionable.resourceId);
             log.info(`${actionable.resourceId} throttled.`);
         }));
