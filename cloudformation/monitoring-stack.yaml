@@ -104,7 +104,7 @@ Resources:
       Handler: index.resourceCostCalculator
       MemorySize: 1024
       Role: !GetAtt IamRoleLambdaExecution.Arn
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Timeout: 300
       Environment:
         Variables:
@@ -126,7 +126,7 @@ Resources:
       Handler: index.resourceThrottler
       MemorySize: 1024
       Role: !GetAtt IamRoleLambdaExecution.Arn
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Timeout: 300
       Environment:
         Variables:
@@ -144,7 +144,7 @@ Resources:
       Handler: index.anomalyDetector
       MemorySize: 1024
       Role: !GetAtt IamRoleLambdaExecution.Arn
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Timeout: 300
       Environment:
         Variables:
@@ -162,7 +162,7 @@ Resources:
       Handler: index.costStreamer
       MemorySize: 1024
       Role: !GetAtt IamRoleLambdaExecution.Arn
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Timeout: 300
       Environment:
         Variables:

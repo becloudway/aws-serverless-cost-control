@@ -1,7 +1,7 @@
 {
-  "name": "serverless-cost-control",
-  "version": "1.0.0",
-  "description": "",
+  "name": "aws-serverless-cost-control",
+  "version": "0.1.0",
+  "description": "Cloudformation Stack for keeping tabs on your serverless resources",
   "main": "index.js",
   "scripts": {
     "build": "rm -rf lib && mkdir lib && npm i && tsc",
@@ -9,8 +9,26 @@
     "test": "jest",
     "test:coverage": "jest --coverage --collectCoverageFrom=src/**/*.ts"
   },
-  "author": "samuel.overloop@cloudway.be",
-  "license": "ISC",
+  "contributors": [
+    {
+      "name": "Samuel Overloop",
+      "email": "samuel.overloop@cloudway.be",
+      "url": "www.cloudway.be"
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/becloudway/aws-serverless-cost-control",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:becloudway/aws-serverless-cost-control.git"
+  },
+  "bugs": {
+    "url": "https://github.com/becloudway/aws-serverless-cost-control/issues"
+  },
+  "engines": {
+    "npm": ">=6.4.0",
+    "node": ">=10.15.0"
+  },
   "dependencies": {
     "aws-lambda": "^0.1.2",
     "aws-sdk": "^2.394.0",
