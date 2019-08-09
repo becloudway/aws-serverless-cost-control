@@ -63,7 +63,7 @@ describe('costStreamer', () => {
     });
 
     afterAll(() => {
-        jest.restoreAllMocks()
+        jest.restoreAllMocks();
         this.costRecordFetchMock.mockRestore();
     });
 

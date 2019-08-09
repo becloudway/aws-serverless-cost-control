@@ -4,7 +4,7 @@ import { AWSClient, wrapCallback } from './AWSClient';
 
 export interface GetResourcesParams {
     tagsPerPage: number;
-    tagFilters: TagFilterList;
+    tagFilters?: TagFilterList;
     resourceTypeFilters: string[];
 }
 

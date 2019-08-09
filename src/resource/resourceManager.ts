@@ -2,6 +2,7 @@ import { RESOURCE_MAP, TAGS, SERVICE_DYNAMODB } from '../config';
 import { Resource } from './resource';
 import { AWSTag, ResourceTag } from '../types';
 import { tagClient } from '../clients';
+import { GetResourcesParams } from '../clients/TagClient';
 
 const getTagValue = (tags: AWSTag[], key: string): string => {
     const tag = tags.find(tagSet => tagSet.Key === key);
@@ -13,50 +14,55 @@ export class ResourceManager {
 
     private defaultCostLimit: number = 10;
 
-    private tagKey: string;
+    private includeTags: ResourceTag[];
 
-    private tagValue: string;
+    private excludeTags: ResourceTag[];
 
-    public constructor(resourceTag: ResourceTag) {
-        this.tagKey = resourceTag.key;
-        this.tagValue = resourceTag.value;
+    public constructor(includeTags: ResourceTag[], excludeTags: ResourceTag[]) {
+        this.includeTags = includeTags;
+        this.excludeTags = excludeTags;
     }
 
     public async init(): Promise<ResourceManager> {
-        const taggedResources = await tagClient.getResources({
+        const getResourcesParams: GetResourcesParams = {
             tagsPerPage: 500,
-            tagFilters: [{
-                Key: this.tagKey,
-                Values: [this.tagValue],
-            }],
             resourceTypeFilters: RESOURCE_MAP,
-        });
+        };
+        if (this.includeTags.length > 0) {
+            getResourcesParams.tagFilters = this.includeTags.map(t => ({ Key: t.key, Values: [t.value] }));
+        }
+
+        const taggedResources = await tagClient.getResources(getResourcesParams);
 
         if (!taggedResources) return this;
 
-        this.resources = taggedResources.ResourceTagMappingList.map((res) => {
-            const arn = res.ResourceARN;
-            const tags = res.Tags;
-            const actionable = getTagValue(tags, TAGS.SCC_ACTIONABLE) === 'true';
-            const costLimit = parseInt((getTagValue(tags, TAGS.SCC_COST_LIMIT)), 10);
+        this.resources = taggedResources.ResourceTagMappingList
+            .filter(resource => resource.Tags
+                .filter(t => this.excludeTags
+                    .find(et => et.value === t.Value && et.key === t.Key)).length === 0)
+            .map((res) => {
+                const arn = res.ResourceARN;
+                const tags = res.Tags;
+                const actionable = getTagValue(tags, TAGS.SCC_ACTIONABLE) === 'true';
+                const costLimit = parseInt((getTagValue(tags, TAGS.SCC_COST_LIMIT)), 10);
 
-            // eslint-disable-next-line prefer-const
-            let [,, service, region,, type, resourceId] = arn.split(':');
+                // eslint-disable-next-line prefer-const
+                let [,, service, region,, type, resourceId] = arn.split(':');
 
-            if (service === SERVICE_DYNAMODB) {
-                [type, resourceId] = type.split('/');
-            }
+                if (service === SERVICE_DYNAMODB) {
+                    [type, resourceId] = type.split('/');
+                }
 
-            return new Resource(
-                service,
-                resourceId,
-                type,
-                region,
-                arn,
-                actionable,
-                Number.isNaN(costLimit) ? this.defaultCostLimit : costLimit,
-            );
-        });
+                return new Resource(
+                    service,
+                    resourceId,
+                    type,
+                    region,
+                    arn,
+                    actionable,
+                    Number.isNaN(costLimit) ? this.defaultCostLimit : costLimit,
+                );
+            });
 
         return this;
     }

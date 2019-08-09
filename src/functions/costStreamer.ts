@@ -1,6 +1,6 @@
 import { differenceInSeconds } from 'date-fns';
 import { log } from '../logger';
-import {CloudwatchClient, cloudwatchClient, kinesisClient} from '../clients';
+import { CloudwatchClient, cloudwatchClient, kinesisClient } from '../clients';
 import * as config from '../config';
 import { DateTime } from '../util';
 import { Resource, ResourceManager } from '../resource';
@@ -13,10 +13,11 @@ export const handler = async (): Promise<LambdaResponse> => {
     try {
         const kinesisStream = process.env.KINESIS_STREAM_NAME;
         const dateRange: DateRange = DateTime.getDateRange(config.metrics.METRIC_DELAY, config.metrics.METRIC_WINDOW);
-        const resourceTag: ResourceTag = { key: config.TAGS.SCC_MONITOR_GROUP, value: 'true' };
+        const includeTags = config.TAGS.INCLUDE_TAGS.map(t => ({ key: t, value: 'true' }));
+        const excludeTags = config.TAGS.EXCLUDE_TAGS.map(t => ({ key: t, value: 'true' }));
 
         // RESOURCES
-        const resourceManager: ResourceManager = await new ResourceManager(resourceTag).init();
+        const resourceManager = await new ResourceManager(includeTags, excludeTags).init();
         const resources: Resource[] = [].concat(...(await Promise.all([
             resourceManager.getResources(config.SERVICE_LAMBDA, config.RESOURCE_LAMBDA_FUNCTION),
             resourceManager.getResources(config.SERVICE_RDS, config.RESOURCE_RDS_CLUSTER_INSTANCE),

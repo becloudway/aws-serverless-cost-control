@@ -14,6 +14,12 @@ Parameters:
   MonitorEmail:
     Type: String
     Description: This email will be used for monitoring notifications
+  IncludeTags:
+    Type: CommaDelimitedList
+    Default: ""
+  ExcludeTags:
+    Type: CommaDelimitedList
+    Default: ""
 
 Mappings:
   DeploymentPath:
@@ -112,6 +118,8 @@ Resources:
           ACTIONABLE_TOPIC_ARN: !Ref SNSTopicSccInhibitor
           KINESIS_ROLE: !GetAtt IamRoleKinesisAnalytics.Arn
           ANOMALY_DETECTOR_LAMBDA_ARN: !GetAtt AnomalyDetectorFn.Arn
+          INCLUDE_TAGS: !Ref IncludeTags
+          EXCLUDE_TAGS: !Ref ExcludeTags
     DependsOn:
       - IamRoleLambdaExecution
       - IamRoleKinesisAnalytics
@@ -168,6 +176,8 @@ Resources:
         Variables:
           METRICS_NAMESPACE: !Ref MetricNameSpace
           KINESIS_STREAM_NAME: !Ref ServerlessCostStream
+          INCLUDE_TAGS: !Ref IncludeTags
+          EXCLUDE_TAGS: !Ref ExcludeTags
     DependsOn:
       - IamRoleLambdaExecution
 
