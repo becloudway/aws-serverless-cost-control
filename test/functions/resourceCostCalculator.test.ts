@@ -8,12 +8,13 @@ import {
 } from '../../src/clients';
 import { Resource, ResourceManager } from '../../src/resource';
 import { buildResource, buildSNSRecord } from '../_helpers/builders';
-import { metrics, SERVICE_LAMBDA } from '../../src/config';
+import { metrics, SERVICE_LAMBDA, TAGS } from '../../src/config';
 import { CostRecord, Pricing } from '../../src/pricing';
 import { DateTime } from '../../src/util';
 import { createMockInstance } from '../_helpers/mocks';
 
 jest.mock('../../src/logger');
+
 const buildInputEvent = (resources: Resource[]): SNSEvent => ({
     Records: resources.map(r => buildSNSRecord(r)),
 });
@@ -146,6 +147,18 @@ describe('costStreamer', () => {
 
         expect(this.publishMock).toHaveBeenCalledTimes(1);
         expect(response.status).toEqual(200);
+    });
+
+    it('correctly sets include and exclude tags', async () => {
+        TAGS.INCLUDE_TAGS = ['hello', 'world'];
+        TAGS.EXCLUDE_TAGS = ['exclude_me'];
+
+        const response: LambdaResponse = await handler();
+        expect(this.resourceManagerInitMock).toHaveBeenCalledTimes(1);
+        expect(this.resourceManagerInitMock).toHaveBeenCalledWith(
+            [{ key: 'hello', value: 'true' }, { key: 'world', value: 'true' }],
+            [{ key: 'exclude_me', value: 'true' }],
+        );
     });
 
     it('returns 400 status with errorMessage when an error occurs', async () => {

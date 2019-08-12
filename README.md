@@ -19,7 +19,7 @@ npm install
 
 1. Deploy cloudformation stack (TODO: add button)
 
-2. Provide the following parameters: 
+2. Provide the following parameters:
     *   `MetricNameSpace` (default: _Cloudway/Serverless/Monitoring_)
     *   `Environment` (default: _dev_)
     *   `ApplicationName` (default: _cloudway-scc_)
@@ -32,6 +32,9 @@ npm install
 
 ```sh
 npm run test
+
+# with coverage
+npm run test:coverage
 ```
 
 ## Authors

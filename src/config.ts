@@ -1,4 +1,5 @@
 import { ObjectIndexer } from './types';
+import { Strings } from './util';
 
 const SERVICE_RDS = 'rds';
 const SERVICE_LAMBDA = 'lambda';
@@ -6,7 +7,6 @@ const SERVICE_DYNAMODB = 'dynamodb';
 const RESOURCE_LAMBDA_FUNCTION = 'function';
 const RESOURCE_RDS_CLUSTER_INSTANCE = 'cluster';
 const RESOURCE_DYNAMODB_TABLE = 'table';
-const parseTags = (tags: string): string[] => (tags && tags.replace(/\s/, '').split(',')) || [];
 
 const REGION_MAP_CODE_TO_NAME: ObjectIndexer<string> = {
     'us-east-1': 'US East (N. Virginia)',
@@ -28,8 +28,8 @@ const REGION_MAP_CODE_TO_NAME: ObjectIndexer<string> = {
 };
 
 const TAGS = {
-    INCLUDE_TAGS: parseTags(process.env.INCLUDE_TAGS),
-    EXCLUDE_TAGS: parseTags(process.env.EXCLUDE_TAGS),
+    INCLUDE_TAGS: Strings.parseList(process.env.INCLUDE_TAGS || ''),
+    EXCLUDE_TAGS: Strings.parseList(process.env.EXCLUDE_TAGS || ''),
     SCC_ACTIONABLE: 'scc-actionable',
     SCC_COST_LIMIT: 'scc-cost-limit',
 };

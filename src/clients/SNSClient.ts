@@ -31,6 +31,6 @@ export class SNSClient extends AWSClient<AWS.SNS> {
     }
 
     public publish(topicArn: string, resource: Resource): Promise<PublishResponse> {
-        return wrapCallback<PublishInput, PublishResponse>(this.client.publish, SNSClient.buildMessage(topicArn, resource));
+        return wrapCallback<PublishInput, PublishResponse>(this.client.publish.bind(this.client), SNSClient.buildMessage(topicArn, resource));
     }
 }

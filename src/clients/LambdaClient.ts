@@ -13,7 +13,7 @@ import { GetMetricStatisticsParams, CloudwatchClient } from './CloudwatchClient'
 
 export class LambdaClient extends AWSClient<AWS.Lambda> {
     public throttle(resourceId: string, allowedConcurrentExecutions: number = 1): Promise<void> {
-        return wrapCallbackVoid<PutFunctionConcurrencyRequest>(this.client.putFunctionConcurrency, {
+        return wrapCallbackVoid<PutFunctionConcurrencyRequest>(this.client.putFunctionConcurrency.bind(this.client), {
             FunctionName: resourceId,
             ReservedConcurrentExecutions: allowedConcurrentExecutions,
         });
@@ -46,7 +46,7 @@ export class LambdaClient extends AWSClient<AWS.Lambda> {
     }
 
     public getMemory(resource: Resource): Promise<number> {
-        return wrapCallback<GetFunctionConfigurationRequest, MemorySize>(this.client.getFunctionConfiguration, {
+        return wrapCallback<GetFunctionConfigurationRequest, MemorySize>(this.client.getFunctionConfiguration.bind(this.client), {
             FunctionName: resource.id,
         }, (data: FunctionConfiguration) => data && data.MemorySize);
     }

@@ -45,7 +45,7 @@ export class RDSClient extends AWSClient<AWS.RDS> {
     }
 
     public async throttle(clusterId: string, options: RDSThrottleOptions = {}): Promise<void> {
-        return wrapCallbackVoid<ModifyDBClusterMessage>(this.client.modifyDBCluster, {
+        return wrapCallbackVoid<ModifyDBClusterMessage>(this.client.modifyDBCluster.bind(this.client), {
             DBClusterIdentifier: clusterId,
             ApplyImmediately: true,
             ScalingConfiguration: {

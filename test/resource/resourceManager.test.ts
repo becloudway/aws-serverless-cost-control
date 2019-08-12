@@ -61,7 +61,7 @@ describe('ResourceManager', () => {
                         },
                         {
                             Key: 'exclude_this_key',
-                            Value: 'exclude_this_value',
+                            Value: 'true',
                         },
                     ],
                 },
@@ -82,7 +82,7 @@ describe('ResourceManager', () => {
         });
 
         resourceTag = { key: faker.lorem.slug(1), value: faker.lorem.slug(3) };
-        resourceManager = await new ResourceManager([], []).init();
+        resourceManager = await new ResourceManager().init([], []);
     });
 
     afterEach(() => {
@@ -94,7 +94,7 @@ describe('ResourceManager', () => {
     });
 
     describe('#init', () => {
-        it('correctly initialises the resourceManager for multiple services', async () => {
+        it('initialises the resourceManager for multiple services', async () => {
             expect(resourceManager).toBeInstanceOf(ResourceManager);
             expect(resourceManager.getResources).toBeInstanceOf(Function);
             expect(resourceManager.getResource).toBeInstanceOf(Function);
@@ -103,7 +103,7 @@ describe('ResourceManager', () => {
         it('correctly calls tagClient with includeTags', async () => {
             const includeTag = { key: faker.lorem.word(), value: faker.lorem.word() };
 
-            resourceManager = await new ResourceManager([includeTag], []).init();
+            resourceManager = await new ResourceManager().init([includeTag], []);
 
             expect(this.tagclientMock).toHaveBeenLastCalledWith({
                 tagsPerPage: expect.any(Number),
@@ -112,7 +112,39 @@ describe('ResourceManager', () => {
             });
         });
 
-        it('correctly initialises the resourceManager for a resource where costLimit tag is invalid', async () => {
+        it('excludes all resources with excludeTags', async () => {
+            const excludeTag = { key: 'exclude_this_key', value: 'true' };
+            this.tagclientMock.mockReturnValueOnce({
+                ResourceTagMappingList: [
+                    {
+                        ResourceARN: lambdaResource.arn,
+                        Tags: [{ Key: 'exclude_this_key', Value: 'true' }],
+                    },
+                ],
+            });
+
+            resourceManager = await new ResourceManager().init([], [excludeTag]);
+
+            expect(resourceManager.getResource(SERVICE_LAMBDA, lambdaResourceId)).toBeNull();
+        });
+
+        it('does not exclude resource where excludeTag is not set to "true"', async () => {
+            const excludeTag = { key: 'exclude_this_key', value: 'true' };
+            this.tagclientMock.mockReturnValueOnce({
+                ResourceTagMappingList: [
+                    {
+                        ResourceARN: lambdaResource.arn,
+                        Tags: [{ Key: 'exclude_this_key', Value: 'false' }],
+                    },
+                ],
+            });
+
+            resourceManager = await new ResourceManager().init([], [excludeTag]);
+
+            expect(resourceManager.getResource(SERVICE_LAMBDA, lambdaResourceId).service).toEqual('lambda');
+        });
+
+        it('initialises the resourceManager for a resource where costLimit tag is invalid', async () => {
             this.tagclientMock.mockReturnValueOnce({
                 ResourceTagMappingList: [
                     {
@@ -131,20 +163,20 @@ describe('ResourceManager', () => {
                 ],
             });
 
-            resourceManager = await new ResourceManager([], []).init();
+            resourceManager = await new ResourceManager().init([], []);
             expect(resourceManager.getResource(SERVICE_LAMBDA, lambdaResourceId).costLimit).toEqual(10);
         });
 
-        it('correctly initialises when AWS return null on the request', async () => {
+        it('initialises when AWS return null on the request', async () => {
             this.tagclientMock.mockReturnValue(null);
-            resourceManager = await new ResourceManager([], []).init();
+            resourceManager = await new ResourceManager().init([], []);
             expect(resourceManager.getResources).toBeInstanceOf(Function);
             expect(resourceManager.getResource).toBeInstanceOf(Function);
         });
 
-        it('correctly initialises when AWS return null resources', async () => {
+        it('initialises when AWS return null resources', async () => {
             this.tagclientMock.mockReturnValue({ ResourceTagMappingList: [] });
-            resourceManager = await new ResourceManager([], []).init();
+            resourceManager = await new ResourceManager().init([], []);
             expect(resourceManager.getResources).toBeInstanceOf(Function);
             expect(resourceManager.getResource).toBeInstanceOf(Function);
         });
@@ -153,7 +185,7 @@ describe('ResourceManager', () => {
     describe('#getResources', () => {
         it('correctly filters out all resources with exclude tags', async () => {
             const excludeTags = [{ key: 'exclude_this_key', value: 'exclude_this_value' }];
-            resourceManager = await new ResourceManager([], excludeTags).init();
+            resourceManager = await new ResourceManager().init([], excludeTags);
             expect(resourceManager.getResources(SERVICE_LAMBDA, RESOURCE_LAMBDA_FUNCTION)).toHaveLength(0);
         });
 

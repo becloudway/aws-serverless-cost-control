@@ -13,13 +13,13 @@ export class KinesisClient extends AWSClient<AWS.Kinesis> {
     }
 
     private getExistingStream(resourceId: string): Promise<StreamDescription> {
-        return wrapCallback<DescribeStreamInput, StreamDescription>(this.client.describeStream, {
+        return wrapCallback<DescribeStreamInput, StreamDescription>(this.client.describeStream.bind(this.client), {
             StreamName: KinesisClient.buildStreamName(resourceId),
         }, (data: DescribeStreamOutput) => data && data.StreamDescription);
     }
 
     private createStream(resourceId: string): Promise<void> {
-        return wrapCallbackVoid<CreateStreamInput>(this.client.createStream, {
+        return wrapCallbackVoid<CreateStreamInput>(this.client.createStream.bind(this.client), {
             ShardCount: 1,
             StreamName: KinesisClient.buildStreamName(resourceId),
         });
@@ -32,7 +32,7 @@ export class KinesisClient extends AWSClient<AWS.Kinesis> {
     }
 
     public async putRecord<T>(streamName: string, record: T): Promise<void> {
-        return wrapCallbackVoid<PutRecordInput>(this.client.putRecord, {
+        return wrapCallbackVoid<PutRecordInput>(this.client.putRecord.bind(this.client), {
             StreamName: streamName,
             PartitionKey: 'partitionKey', // streams only have one shard, so partitionkey is not relevant
             Data: JSON.stringify(record),

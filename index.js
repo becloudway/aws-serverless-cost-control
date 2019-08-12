@@ -1,7 +1,7 @@
-const resourceCostCalculator = require('./lib/resourceCostCalculator');
-const resourceThrottler = require('./lib/resourceThrottler');
-const anomalyDetector = require('./lib/anomalyDetector');
-const costStreamer = require('./lib/costStreamer');
+const resourceCostCalculator = require('./lib/functions/resourceCostCalculator');
+const resourceThrottler = require('./lib/functions/resourceThrottler');
+const anomalyDetector = require('./lib/functions/anomalyDetector');
+const costStreamer = require('./lib/functions/costStreamer');
 
 module.exports = {
     resourceCostCalculator: resourceCostCalculator.handler,

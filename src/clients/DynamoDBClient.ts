@@ -10,7 +10,7 @@ type MetricName = 'ConsumedWriteCapacityUnits' | 'ConsumedReadCapacityUnits';
 
 export class DynamoDBClient extends AWSClient<AWS.DynamoDB> {
     public async describeTable(tableName: string): Promise<DescribeTableOutput> {
-        return wrapCallback<DescribeTableInput, DescribeTableOutput>(this.client.describeTable, { TableName: tableName });
+        return wrapCallback<DescribeTableInput, DescribeTableOutput>(this.client.describeTable.bind(this.client), { TableName: tableName });
     }
 
     public async getWriteCapacityUnits(resource: Resource, start: Date, end: Date): Promise<number> {
@@ -38,7 +38,7 @@ export class DynamoDBClient extends AWSClient<AWS.DynamoDB> {
     }
 
     public async throttle(resourceId: string, { readCapacityUnits = 1, writeCapacityUnits = 1 } = {}): Promise<void> {
-        return wrapCallbackVoid<UpdateTableInput>(this.client.updateTable, {
+        return wrapCallbackVoid<UpdateTableInput>(this.client.updateTable.bind(this.client), {
             TableName: resourceId,
             BillingMode: 'PROVISIIONED',
             ProvisionedThroughput: {

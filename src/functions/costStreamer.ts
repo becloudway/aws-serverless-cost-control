@@ -17,7 +17,7 @@ export const handler = async (): Promise<LambdaResponse> => {
         const excludeTags = config.TAGS.EXCLUDE_TAGS.map(t => ({ key: t, value: 'true' }));
 
         // RESOURCES
-        const resourceManager = await new ResourceManager(includeTags, excludeTags).init();
+        const resourceManager = await new ResourceManager().init(includeTags, excludeTags);
         const resources: Resource[] = [].concat(...(await Promise.all([
             resourceManager.getResources(config.SERVICE_LAMBDA, config.RESOURCE_LAMBDA_FUNCTION),
             resourceManager.getResources(config.SERVICE_RDS, config.RESOURCE_RDS_CLUSTER_INSTANCE),

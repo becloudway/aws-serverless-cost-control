@@ -59,5 +59,6 @@ typings/
 
 # Build directories
 lib/
+build/
 
-
+.aws-sam/

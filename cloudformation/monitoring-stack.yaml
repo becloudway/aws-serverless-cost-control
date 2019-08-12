@@ -15,17 +15,15 @@ Parameters:
     Type: String
     Description: This email will be used for monitoring notifications
   IncludeTags:
-    Type: CommaDelimitedList
+    Type: String
     Default: ""
   ExcludeTags:
-    Type: CommaDelimitedList
-    Default: ""
-
-Mappings:
-  DeploymentPath:
-    Latest:
-      BucketName: "scc-root-stack-serverlessdeploymentbucket-2s7et78s8ity"
-      BucketKey: "latest/functions.zip"
+    Type: String
+    Default: 'cloudway-scc-stack'
+  ArtifactBucket:
+    Type: String
+  ArtifactKey:
+    Type: String
 
 Resources:
   # ============= IAM ============== #
@@ -104,8 +102,8 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Code:
-        S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
-        S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
+        S3Bucket: !Ref ArtifactBucket
+        S3Key: !Ref ArtifactKey
       FunctionName: !Sub "${Environment}-${ApplicationName}-resource-cost-calculator"
       Handler: index.resourceCostCalculator
       MemorySize: 1024
@@ -120,6 +118,9 @@ Resources:
           ANOMALY_DETECTOR_LAMBDA_ARN: !GetAtt AnomalyDetectorFn.Arn
           INCLUDE_TAGS: !Ref IncludeTags
           EXCLUDE_TAGS: !Ref ExcludeTags
+      Tags:
+        - Key: "scc-cloudway-stack"
+          Value: "true"
     DependsOn:
       - IamRoleLambdaExecution
       - IamRoleKinesisAnalytics
@@ -128,8 +129,8 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Code:
-        S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
-        S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
+        S3Bucket: !Ref ArtifactBucket
+        S3Key: !Ref ArtifactKey
       FunctionName: !Sub "${Environment}-${ApplicationName}-resource-throttler"
       Handler: index.resourceThrottler
       MemorySize: 1024
@@ -139,6 +140,9 @@ Resources:
       Environment:
         Variables:
           METRICS_NAMESPACE: !Ref MetricNameSpace
+      Tags:
+        - Key: "scc-cloudway-stack"
+          Value: "true"
     DependsOn:
     - IamRoleLambdaExecution
 
@@ -146,8 +150,8 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Code:
-        S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
-        S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
+        S3Bucket: !Ref ArtifactBucket
+        S3Key: !Ref ArtifactKey
       FunctionName: !Sub "${Environment}-${ApplicationName}-anomaly-detector"
       Handler: index.anomalyDetector
       MemorySize: 1024
@@ -157,6 +161,9 @@ Resources:
       Environment:
         Variables:
           METRICS_NAMESPACE: !Ref MetricNameSpace
+      Tags:
+        - Key: "scc-cloudway-stack"
+          Value: "true"
     DependsOn:
       - IamRoleLambdaExecution
 
@@ -164,8 +171,8 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Code:
-        S3Bucket: !FindInMap [DeploymentPath, Latest, BucketName]
-        S3Key: !FindInMap [DeploymentPath, Latest, BucketKey]
+        S3Bucket: !Ref ArtifactBucket
+        S3Key: !Ref ArtifactKey
       FunctionName: !Sub "${Environment}-${ApplicationName}-cost-streamer"
       Handler: index.costStreamer
       MemorySize: 1024
@@ -178,6 +185,9 @@ Resources:
           KINESIS_STREAM_NAME: !Ref ServerlessCostStream
           INCLUDE_TAGS: !Ref IncludeTags
           EXCLUDE_TAGS: !Ref ExcludeTags
+      Tags:
+        - Key: "scc-cloudway-stack"
+          Value: "true"
     DependsOn:
       - IamRoleLambdaExecution
 

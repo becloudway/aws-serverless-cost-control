@@ -60,7 +60,7 @@ export class PricingClient extends AWSClient<AWS.Pricing> {
             Value: f.value,
         })).concat(defaultFilter);
 
-        const products: GetProductsResponse = await wrapCallback<GetProductsRequest, GetProductsResponse>(this.client.getProducts, {
+        const products: GetProductsResponse = await wrapCallback<GetProductsRequest, GetProductsResponse>(this.client.getProducts.bind(this.client), {
             Filters: productFilters,
             ServiceCode: serviceCode,
         });

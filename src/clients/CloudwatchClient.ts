@@ -61,7 +61,7 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
             Period: period,
             Statistics: statistics,
         };
-        return wrapCallback<GetMetricStatisticsInput, GetMetricStatisticsOutput>(this.client.getMetricStatistics, params);
+        return wrapCallback<GetMetricStatisticsInput, GetMetricStatisticsOutput>(this.client.getMetricStatistics.bind(this.client), params);
     }
 
     public getCostMetricStatistics(params: GetCostMetricStatisticsParams): Promise<GetMetricStatisticsOutput> {
@@ -103,7 +103,7 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
             }],
         };
 
-        return wrapCallbackVoid<PutMetricDataInput>(this.client.putMetricData, params);
+        return wrapCallbackVoid<PutMetricDataInput>(this.client.putMetricData.bind(this.client), params);
     }
 
     public putAnomalyMetricData(timestamp: Date, value: number): Promise<void> {
@@ -117,7 +117,7 @@ export class CloudwatchClient extends AWSClient<AWS.CloudWatch> {
             }],
         };
 
-        return wrapCallbackVoid<PutMetricDataInput>(this.client.putMetricData, params);
+        return wrapCallbackVoid<PutMetricDataInput>(this.client.putMetricData.bind(this.client), params);
     }
 
     public static calculateDatapointsAverage(datapoints?: Datapoint[]): number {

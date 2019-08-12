@@ -1,11 +1,12 @@
-import { RESOURCE_MAP, TAGS, SERVICE_DYNAMODB } from '../config';
+import { TagFilter } from 'aws-sdk/clients/resourcegroupstaggingapi';
+import { RESOURCE_MAP, SERVICE_DYNAMODB, TAGS } from '../config';
 import { Resource } from './resource';
 import { AWSTag, ResourceTag } from '../types';
 import { tagClient } from '../clients';
 import { GetResourcesParams } from '../clients/TagClient';
 
 const getTagValue = (tags: AWSTag[], key: string): string => {
-    const tag = tags.find(tagSet => tagSet.Key === key);
+    const tag = tags.find((tagSet): boolean => tagSet.Key === key);
     return tag && tag.Value;
 };
 
@@ -14,33 +15,22 @@ export class ResourceManager {
 
     private defaultCostLimit: number = 10;
 
-    private includeTags: ResourceTag[];
-
-    private excludeTags: ResourceTag[];
-
-    public constructor(includeTags: ResourceTag[], excludeTags: ResourceTag[]) {
-        this.includeTags = includeTags;
-        this.excludeTags = excludeTags;
-    }
-
-    public async init(): Promise<ResourceManager> {
+    public async init(includeTags: ResourceTag[], excludeTags: ResourceTag[]): Promise<ResourceManager> {
         const getResourcesParams: GetResourcesParams = {
             tagsPerPage: 500,
             resourceTypeFilters: RESOURCE_MAP,
+            tagFilters: includeTags.length > 0 ? includeTags.map((t): TagFilter => ({ Key: t.key, Values: [t.value] })) : null,
         };
-        if (this.includeTags.length > 0) {
-            getResourcesParams.tagFilters = this.includeTags.map(t => ({ Key: t.key, Values: [t.value] }));
-        }
 
         const taggedResources = await tagClient.getResources(getResourcesParams);
 
         if (!taggedResources) return this;
 
         this.resources = taggedResources.ResourceTagMappingList
-            .filter(resource => resource.Tags
-                .filter(t => this.excludeTags
-                    .find(et => et.value === t.Value && et.key === t.Key)).length === 0)
-            .map((res) => {
+            .filter((resource): boolean => resource.Tags
+                .filter((t): ResourceTag => excludeTags
+                    .find((et): boolean => et.value === t.Value && et.key === t.Key)).length === 0)
+            .map((res): Resource => {
                 const arn = res.ResourceARN;
                 const tags = res.Tags;
                 const actionable = getTagValue(tags, TAGS.SCC_ACTIONABLE) === 'true';
@@ -69,11 +59,11 @@ export class ResourceManager {
 
     public getResources(service: string, type: string): Resource[] {
         const match = new RegExp(`^${type}`);
-        return this.resources.filter(r => r.service === service && match.test(r.type));
+        return this.resources.filter((r): boolean => r.service === service && match.test(r.type));
     }
 
     public getResource(service: string, resourceId: string): Resource {
-        const resource: Resource = this.resources.find(r => r.service === service && r.id === resourceId);
+        const resource: Resource = this.resources.find((r): boolean => r.service === service && r.id === resourceId);
         return resource || null;
     }
 }
