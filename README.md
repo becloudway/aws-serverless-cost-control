@@ -1,6 +1,12 @@
 <h1 align="center">Welcome to aws-serverless-cost-control 👋</h1>
 <p>
   <img alt="Version" src="https://img.shields.io/badge/version-0.1.0-blue.svg?cacheSeconds=2592000" />
+  <a href="https://travis-ci.org/becloudway/aws-serverless-cost-control">
+  <img alt="Coverage" src="https://travis-ci.org/becloudway/aws-serverless-cost-control.svg?branch=master" />
+  </a>
+  <a href="https://codecov.io/gh/becloudway/aws-serverless-cost-control">
+    <img src="https://codecov.io/gh/becloudway/aws-serverless-cost-control/branch/master/graph/badge.svg" />
+  </a>
 </p>
 
 > Cloudformation Stack for keeping tabs on your serverless resources
