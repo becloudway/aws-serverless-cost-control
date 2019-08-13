@@ -1,9 +1,9 @@
 import { TagFilter } from 'aws-sdk/clients/resourcegroupstaggingapi';
-import { RESOURCE_MAP, SERVICE_DYNAMODB, TAGS } from '../config';
-import { Resource } from './resource';
-import { AWSTag, ResourceTag } from '../types';
 import { tagClient } from '../clients';
 import { GetResourcesParams } from '../clients/TagClient';
+import { RESOURCE_MAP, SERVICE_DYNAMODB, TAGS } from '../config';
+import { AWSTag, ResourceTag } from '../types';
+import { Resource } from './resource';
 
 const getTagValue = (tags: AWSTag[], key: string): string => {
     const tag = tags.find((tagSet): boolean => tagSet.Key === key);
@@ -12,19 +12,18 @@ const getTagValue = (tags: AWSTag[], key: string): string => {
 
 export class ResourceManager {
     private resources: Resource[] = [];
-
     private defaultCostLimit: number = 10;
 
     public async init(includeTags: ResourceTag[], excludeTags: ResourceTag[]): Promise<ResourceManager> {
         const getResourcesParams: GetResourcesParams = {
-            tagsPerPage: 500,
             resourceTypeFilters: RESOURCE_MAP,
             tagFilters: includeTags.length > 0 ? includeTags.map((t): TagFilter => ({ Key: t.key, Values: [t.value] })) : null,
+            tagsPerPage: 500,
         };
 
         const taggedResources = await tagClient.getResources(getResourcesParams);
 
-        if (!taggedResources) return this;
+        if (!taggedResources) { return this; }
 
         this.resources = taggedResources.ResourceTagMappingList
             .filter((resource): boolean => resource.Tags
@@ -36,7 +35,7 @@ export class ResourceManager {
                 const actionable = getTagValue(tags, TAGS.SCC_ACTIONABLE) === 'true';
                 const costLimit = parseInt((getTagValue(tags, TAGS.SCC_COST_LIMIT)), 10);
 
-                // eslint-disable-next-line prefer-const
+                // tslint:disable-next-line:prefer-const
                 let [,, service, region,, type, resourceId] = arn.split(':');
 
                 if (service === SERVICE_DYNAMODB) {

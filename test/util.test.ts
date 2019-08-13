@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import * as util from '../src/util';
+import * as util from '../src/utils';
 
 describe('Util', () => {
     describe('Strings', () => {

@@ -8,7 +8,7 @@ import { pricingClient, PricingClient } from '../../src/clients';
 import { regions } from '../../src/config';
 import * as pricingLambdaJson from '../_resources/pricing.lambda.json';
 import { buildResource } from '../_helpers/builders';
-import { Numbers } from '../../src/util';
+import { Numbers } from '../../src/utils';
 
 const ONE_MILLION = 1000 * 1000;
 let lambdaPricing: LambdaPricing;

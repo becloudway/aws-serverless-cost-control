@@ -1,21 +1,14 @@
-import { PricingResult, ProductPricing } from '../types';
+import { PricingClient, pricingClient } from '../clients';
 import { regions, window } from '../config';
 import { Dimension } from '../dimension';
-import { PricingClient, pricingClient } from '../clients';
-import { Numbers } from '../util';
+import { PricingResult, ProductPricing } from '../types';
+import { Numbers } from '../utils';
 
 export abstract class Pricing {
     protected pricingClient: PricingClient = pricingClient;
-
     protected region: string = regions.CURRENT_REGION;
-
     protected currency: string = 'USD';
-
     protected _pricing: ProductPricing[] = [];
-
-    abstract async init(): Promise<Pricing>;
-
-    abstract calculateForDimension(dimension: Dimension): PricingResult;
 
     public constructor(injectedClient?: PricingClient) {
         if (injectedClient instanceof PricingClient) {
@@ -28,6 +21,10 @@ export abstract class Pricing {
         return Numbers.round(cost * getForecastFactor(diffInSeconds), 2);
     }
 
+    public abstract async init(): Promise<Pricing>;
+
+    public abstract calculateForDimension(dimension: Dimension): PricingResult;
+
     public calculate(resourceDimensions: Dimension[]): PricingResult[] {
         return resourceDimensions.map(d => this.calculateForDimension(d));
     }
@@ -37,7 +34,7 @@ export abstract class Pricing {
     }
 
     protected getPricePerUnit(unit: string): number {
-        const price = this._pricing.find(p => p.unit === unit);
+        const price = this._pricing.find((p): boolean => p.unit === unit);
         return price && price.pricePerUnit;
     }
 }

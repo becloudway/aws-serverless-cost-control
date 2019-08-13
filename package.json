@@ -7,7 +7,8 @@
     "build": "rm -rf lib && mkdir lib && npm i && tsc",
     "package": "rm -rf build && mkdir build && cp -r lib index.js package.json package-lock.json build && cd build && npm i --production && zip -qr functions.zip node_modules lib index.js",
     "test": "jest",
-    "report-coverage": "jest && cat ./coverage/lcov.info | codacy-coverage"
+    "report-coverage": "jest && cat ./coverage/lcov.info | codacy-coverage",
+    "lint": "tslint --project ./tsconfig.json"
   },
   "contributors": [
     {
@@ -42,17 +43,12 @@
     "@types/faker": "^4.1.5",
     "@types/jest": "^24.0.17",
     "@types/lodash": "^4.14.136",
-    "@typescript-eslint/eslint-plugin": "^1.13.0",
-    "@typescript-eslint/parser": "^1.13.0",
-    "dotenv": "^8.0.0",
-    "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.2.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-typescript": "^0.14.0",
     "faker": "^4.1.0",
     "jest": "^24.0.0",
     "jest-mock": "^24.8.0",
     "ts-jest": "^24.0.0",
+    "tslint": "^5.18.0",
+    "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.5.3"
   }
 }

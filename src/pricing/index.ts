@@ -1,13 +1,5 @@
-import { DynamoDBPricing } from './DynamoDBPricing';
-import { LambdaPricing } from './LambdaPricing';
-import { RDSPricing } from './RDSPricing';
-import { Pricing } from './Pricing';
-import { CostRecord } from './CostRecord';
-
-export {
-    DynamoDBPricing,
-    LambdaPricing,
-    RDSPricing,
-    Pricing,
-    CostRecord,
-};
+export { CostRecord } from './CostRecord';
+export { DynamoDBPricing } from './DynamoDBPricing';
+export { LambdaPricing } from './LambdaPricing';
+export { Pricing } from './Pricing';
+export { RDSPricing } from './RDSPricing';

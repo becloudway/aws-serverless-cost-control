@@ -1,6 +1,6 @@
 import { SNSEvent } from 'aws-lambda';
-import { SERVICE_DYNAMODB, SERVICE_LAMBDA, SERVICE_RDS } from '../config';
 import { dynamodbClient, lambdaClient, rdsClient } from '../clients';
+import { SERVICE_DYNAMODB, SERVICE_LAMBDA, SERVICE_RDS } from '../config';
 import { log } from '../logger';
 import { Resource } from '../resource';
 import { LambdaResponse } from '../types';
@@ -34,8 +34,8 @@ export const handler = async (event: SNSEvent): Promise<LambdaResponse> => {
     } catch (e) {
         log.error('Something went wrong', e);
         return {
-            status: 400,
             message: e.message,
+            status: 400,
         };
     }
 };

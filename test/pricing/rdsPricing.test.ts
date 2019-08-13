@@ -10,7 +10,7 @@ import * as rdsIopsPricing from '../_resources/pricing.rds.iops.json';
 import * as rdsStoragePricing from '../_resources/pricing.rds.storage.json';
 import { RDSDimension } from '../../src/dimension';
 import { buildResource } from '../_helpers/builders';
-import { Numbers } from '../../src/util';
+import { Numbers } from '../../src/utils';
 
 const ONE_MILLION = 1000 * 1000;
 let rdsPricing: RDSPricing;

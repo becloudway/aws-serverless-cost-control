@@ -7,4 +7,5 @@ cache:
 before_script:
   - npm install -g codacy-coverage
 script:
+  - npm run lint
   - npm run report-coverage

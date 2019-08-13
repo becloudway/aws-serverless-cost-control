@@ -11,9 +11,9 @@ export interface GetResourcesParams {
 export class TagClient extends AWSClient<AWS.ResourceGroupsTaggingAPI> {
     public getResources({ tagsPerPage, tagFilters, resourceTypeFilters }: GetResourcesParams): Promise<GetResourcesOutput> {
         return wrapCallback<GetResourcesInput, GetResourcesOutput>(this.client.getResources.bind(this.client), {
-            TagsPerPage: tagsPerPage,
             ResourceTypeFilters: resourceTypeFilters,
             TagFilters: tagFilters,
+            TagsPerPage: tagsPerPage,
         });
     }
 }

@@ -1,45 +1,43 @@
 import { differenceInMinutes, differenceInSeconds } from 'date-fns';
-import { Pricing } from './Pricing';
-import { RDSDimension } from '../dimension';
 import { window } from '../config';
+import { RDSDimension } from '../dimension';
 import { PricingResult, ProductPricing } from '../types';
+import { Pricing } from './Pricing';
 
 const ONE_MILLION = 10 ** 6;
 
 export class RDSPricing extends Pricing {
     private _monthlyStoragePrice: number;
-
     private _hourlyACUPrice: number;
-
     private _iopsPrice: number;
 
     public async init(): Promise<RDSPricing> {
         const acuPricing: ProductPricing[] = await this.pricingClient.getProducts({
-            serviceCode: 'AmazonRDS',
-            region: this.region,
             filters: [
                 { field: 'productFamily', value: 'serverless' },
             ],
+            region: this.region,
+            serviceCode: 'AmazonRDS',
         });
 
         const iopsPricing: ProductPricing[] = await this.pricingClient.getProducts({
-            serviceCode: 'AmazonRDS',
-            region: this.region,
             filters: [
                 { field: 'productFamily', value: 'System Operation' },
                 { field: 'group', value: 'Aurora I/O Operation' },
                 { field: 'databaseEngine', value: 'any' },
             ],
+            region: this.region,
+            serviceCode: 'AmazonRDS',
         });
 
         const storagePricing: ProductPricing[] = await this.pricingClient.getProducts({
-            serviceCode: 'AmazonRDS',
-            region: this.region,
             filters: [
                 { field: 'productFamily', value: 'Database Storage' },
                 { field: 'volumeType', value: 'General Purpose-Aurora' },
                 { field: 'databaseEngine', value: 'any' },
             ],
+            region: this.region,
+            serviceCode: 'AmazonRDS',
         });
 
         if (storagePricing) {
@@ -69,15 +67,15 @@ export class RDSPricing extends Pricing {
         const totalCost = ACUCost + storageCost + iopsCost;
 
         return {
+            breakdown: {
+                ACUCharges: ACUCost,
+                iopsCharges: iopsCost,
+                storageCharges: storageCost,
+            },
             currency: this.currency,
             estimatedMonthlyCharge: RDSPricing.getMonthlyEstimate(totalCost, costWindowSeconds),
-            totalCostWindowSeconds: costWindowSeconds,
             totalCost,
-            breakdown: {
-                storageCharges: storageCost,
-                iopsCharges: iopsCost,
-                ACUCharges: ACUCost,
-            },
+            totalCostWindowSeconds: costWindowSeconds,
         };
     }
 

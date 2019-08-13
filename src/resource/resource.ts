@@ -1,18 +1,11 @@
 export class Resource {
     private _service: string;
-
     private _type: string;
-
     private _id: string;
-
     private _arn: string;
-
     private _region: string;
-
     private _actionable: boolean;
-
     private _costLimit: number;
-
     private _resourceId: string;
 
     public constructor(

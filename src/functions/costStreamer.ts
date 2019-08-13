@@ -1,13 +1,13 @@
 import { differenceInSeconds } from 'date-fns';
-import { log } from '../logger';
 import { CloudwatchClient, cloudwatchClient, kinesisClient } from '../clients';
 import * as config from '../config';
-import { DateTime } from '../util';
+import { log } from '../logger';
+import { Pricing } from '../pricing';
 import { Resource, ResourceManager } from '../resource';
 import {
     DateRange, KinesisCostRecord, LambdaResponse, ResourceTag,
 } from '../types';
-import { Pricing } from '../pricing';
+import { DateTime } from '../utils';
 
 export const handler = async (): Promise<LambdaResponse> => {
     try {
@@ -27,9 +27,9 @@ export const handler = async (): Promise<LambdaResponse> => {
         const resourcesCost: number = (await Promise.all(resources.map(async (resource) => {
             const statistics = await cloudwatchClient.getCostMetricStatistics({
                 metricName: config.metrics.NAME_COST,
+                range: dateRange,
                 resourceId: resource.id,
                 service: resource.service,
-                range: dateRange,
             });
 
             return CloudwatchClient.calculateDatapointsAverage(statistics.Datapoints);
@@ -47,8 +47,8 @@ export const handler = async (): Promise<LambdaResponse> => {
     } catch (e) {
         log.error('Something went wrong', e);
         return {
-            status: 400,
             message: e.message,
+            status: 400,
         };
     }
 };

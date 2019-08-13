@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/interface-name-prefix */
-import { Resource } from '../resource';
-import {
-    Dimension, DynamoDBDimension, LambdaDimension, RDSDimension,
-} from '../dimension';
-import { DateRange, PricingResult } from '../types';
 import {
     DynamoDBPricing, LambdaPricing, Pricing, RDSPricing,
 } from '.';
 import { SERVICE_DYNAMODB, SERVICE_LAMBDA, SERVICE_RDS } from '../config';
+import {
+    Dimension, DynamoDBDimension, LambdaDimension, RDSDimension,
+} from '../dimension';
 import { log } from '../logger';
+import { Resource } from '../resource';
+import { DateRange, PricingResult } from '../types';
 
 const pricings = new Map<string, new() => Pricing>();
 pricings.set(SERVICE_DYNAMODB, DynamoDBPricing);
@@ -20,21 +20,14 @@ dimensions.set(SERVICE_DYNAMODB, DynamoDBDimension);
 dimensions.set(SERVICE_LAMBDA, LambdaDimension);
 dimensions.set(SERVICE_RDS, RDSDimension);
 
-interface IPricing {
-    new(): Pricing;
-}
+type IPricing = new() => Pricing;
 
-interface IDimension {
-    new(...params: any[]): Dimension;
-}
+type IDimension = new(...params: any[]) => Dimension;
 
 export class CostRecord {
     private _resource: Resource;
-
     private Pricing: IPricing;
-
     private Dimension: IDimension;
-
     private _pricing: PricingResult;
 
     public constructor(resource: Resource, pricing?: IPricing, dimension?: IDimension) {

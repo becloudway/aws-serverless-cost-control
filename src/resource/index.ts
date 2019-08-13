@@ -1,7 +1,2 @@
-import { Resource } from './resource';
-import { ResourceManager } from './resourceManager';
-
-export {
-    Resource,
-    ResourceManager,
-};
+export { Resource } from './resource';
+export { ResourceManager } from './resourceManager';

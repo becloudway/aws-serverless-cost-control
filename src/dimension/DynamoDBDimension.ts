@@ -1,11 +1,9 @@
-import { Dimension } from './Dimension';
 import { dynamodbClient } from '../clients';
+import { Dimension } from './Dimension';
 
 export class DynamoDBDimension extends Dimension {
     private _readCapacityUnits: number = 0;
-
     private _writeCapacityUnits: number = 0;
-
     private _storageSizeBytes: number = 0;
 
     public async create(): Promise<DynamoDBDimension> {

@@ -9,7 +9,7 @@ import * as dynamodbRequestPricing from '../_resources/pricing.dynamodb.requests
 import * as dynamodbStoragePricing from '../_resources/pricing.dynamodb.storage.json';
 import { DynamoDBDimension } from '../../src/dimension';
 import { buildResource } from '../_helpers/builders';
-import { Numbers } from '../../src/util';
+import { Numbers } from '../../src/utils';
 
 const ONE_MILLION = 1000 * 1000;
 let dynamodbPricing: DynamoDBPricing;

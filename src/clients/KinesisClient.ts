@@ -12,6 +12,20 @@ export class KinesisClient extends AWSClient<AWS.Kinesis> {
         return `${resourceId}-stream`;
     }
 
+    public async createStreamIfNotExists(resourceId: string): Promise<StreamDescription> {
+        const stream: StreamDescription = await this.getExistingStream(resourceId);
+        if (!stream) { await this.createStream(resourceId); }
+        return stream || this.getExistingStream(resourceId);
+    }
+
+    public async putRecord<T>(streamName: string, record: T): Promise<void> {
+        return wrapCallbackVoid<PutRecordInput>(this.client.putRecord.bind(this.client), {
+            Data: JSON.stringify(record),
+            PartitionKey: 'partitionKey', // streams only have one shard, so partitionkey is not relevant
+            StreamName: streamName,
+        });
+    }
+
     private getExistingStream(resourceId: string): Promise<StreamDescription> {
         return wrapCallback<DescribeStreamInput, StreamDescription>(this.client.describeStream.bind(this.client), {
             StreamName: KinesisClient.buildStreamName(resourceId),
@@ -22,20 +36,6 @@ export class KinesisClient extends AWSClient<AWS.Kinesis> {
         return wrapCallbackVoid<CreateStreamInput>(this.client.createStream.bind(this.client), {
             ShardCount: 1,
             StreamName: KinesisClient.buildStreamName(resourceId),
-        });
-    }
-
-    public async createStreamIfNotExists(resourceId: string): Promise<StreamDescription> {
-        const stream: StreamDescription = await this.getExistingStream(resourceId);
-        if (!stream) await this.createStream(resourceId);
-        return stream || this.getExistingStream(resourceId);
-    }
-
-    public async putRecord<T>(streamName: string, record: T): Promise<void> {
-        return wrapCallbackVoid<PutRecordInput>(this.client.putRecord.bind(this.client), {
-            StreamName: streamName,
-            PartitionKey: 'partitionKey', // streams only have one shard, so partitionkey is not relevant
-            Data: JSON.stringify(record),
         });
     }
 }

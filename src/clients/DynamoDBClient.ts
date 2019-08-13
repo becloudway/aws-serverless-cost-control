@@ -1,14 +1,32 @@
 import * as AWS from 'aws-sdk';
 import { DescribeTableInput, DescribeTableOutput, UpdateTableInput } from 'aws-sdk/clients/dynamodb';
-import { Datapoint } from 'aws-sdk/clients/cloudwatch';
-import { AWSClient, wrapCallback, wrapCallbackVoid } from './AWSClient';
 import { metrics } from '../config';
-import { CloudwatchClient, GetMetricStatisticsParams } from './CloudwatchClient';
 import { Resource } from '../resource';
+import { AWSClient, wrapCallback, wrapCallbackVoid } from './AWSClient';
+import { CloudwatchClient, GetMetricStatisticsParams } from './CloudwatchClient';
 
 type MetricName = 'ConsumedWriteCapacityUnits' | 'ConsumedReadCapacityUnits';
 
+interface ProvisionedThroughPut {
+    readCapacityUnits?: number;
+    writeCapacityUnits?: number;
+}
+
 export class DynamoDBClient extends AWSClient<AWS.DynamoDB> {
+    private static DEFAULT_CAPACITY_UNIT: number = 1;
+
+    private static buildMetricStatisticsParams(metricName: MetricName, resource: Resource, start: Date, end: Date): GetMetricStatisticsParams {
+        return {
+            dimensions: [{ Name: 'TableName', Value: resource.id }],
+            endTime: end,
+            metricName,
+            nameSpace: 'AWS/DynamoDB',
+            period: 60 * metrics.METRIC_WINDOW,
+            startTime: start,
+            statistics: ['Average'],
+        };
+    }
+
     public async describeTable(tableName: string): Promise<DescribeTableOutput> {
         return wrapCallback<DescribeTableInput, DescribeTableOutput>(this.client.describeTable.bind(this.client), { TableName: tableName });
     }
@@ -37,26 +55,20 @@ export class DynamoDBClient extends AWSClient<AWS.DynamoDB> {
         return CloudwatchClient.calculateDatapointsAverage(statistics.Datapoints);
     }
 
-    public async throttle(resourceId: string, { readCapacityUnits = 1, writeCapacityUnits = 1 } = {}): Promise<void> {
+    public async throttle(
+        resourceId: string,
+        provisionedThroughPut: ProvisionedThroughPut = {
+            readCapacityUnits: DynamoDBClient.DEFAULT_CAPACITY_UNIT,
+            writeCapacityUnits: DynamoDBClient.DEFAULT_CAPACITY_UNIT,
+        },
+    ): Promise<void> {
         return wrapCallbackVoid<UpdateTableInput>(this.client.updateTable.bind(this.client), {
-            TableName: resourceId,
             BillingMode: 'PROVISIIONED',
             ProvisionedThroughput: {
-                ReadCapacityUnits: readCapacityUnits,
-                WriteCapacityUnits: writeCapacityUnits,
+                ReadCapacityUnits: provisionedThroughPut.readCapacityUnits,
+                WriteCapacityUnits: provisionedThroughPut.writeCapacityUnits,
             },
+            TableName: resourceId,
         });
-    }
-
-    private static buildMetricStatisticsParams(metricName: MetricName, resource: Resource, start: Date, end: Date): GetMetricStatisticsParams {
-        return {
-            nameSpace: 'AWS/DynamoDB',
-            metricName,
-            dimensions: [{ Name: 'TableName', Value: resource.id }],
-            startTime: start,
-            endTime: end,
-            period: 60 * metrics.METRIC_WINDOW,
-            statistics: ['Average'],
-        };
     }
 }

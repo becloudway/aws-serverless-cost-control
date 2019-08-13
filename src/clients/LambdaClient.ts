@@ -1,17 +1,35 @@
 import * as AWS from 'aws-sdk';
+import { MetricName } from 'aws-sdk/clients/cloudwatch';
 import {
     FunctionConfiguration,
     GetFunctionConfigurationRequest,
     MemorySize,
     PutFunctionConcurrencyRequest,
 } from 'aws-sdk/clients/lambda';
-import { MetricName } from 'aws-sdk/clients/cloudwatch';
-import { AWSClient, wrapCallback, wrapCallbackVoid } from './AWSClient';
 import { metrics } from '../config';
-import { Resource } from '../resource/resource';
-import { GetMetricStatisticsParams, CloudwatchClient } from './CloudwatchClient';
+import { Resource } from '../resource';
+import { AWSClient, wrapCallback, wrapCallbackVoid } from './AWSClient';
+import { CloudwatchClient, GetMetricStatisticsParams } from './CloudwatchClient';
 
 export class LambdaClient extends AWSClient<AWS.Lambda> {
+    private static buildMetricStatisticsParams(
+        metricName: MetricName,
+        statistics: string[],
+        resource: Resource,
+        start: Date,
+        end: Date,
+    ): GetMetricStatisticsParams {
+        return {
+            dimensions: [{ Name: 'FunctionName', Value: resource.id }],
+            endTime: end,
+            metricName,
+            nameSpace: 'AWS/Lambda',
+            period: 60 * metrics.METRIC_WINDOW,
+            startTime: start,
+            statistics,
+        };
+    }
+
     public throttle(resourceId: string, allowedConcurrentExecutions: number = 1): Promise<void> {
         return wrapCallbackVoid<PutFunctionConcurrencyRequest>(this.client.putFunctionConcurrency.bind(this.client), {
             FunctionName: resourceId,
@@ -48,18 +66,6 @@ export class LambdaClient extends AWSClient<AWS.Lambda> {
     public getMemory(resource: Resource): Promise<number> {
         return wrapCallback<GetFunctionConfigurationRequest, MemorySize>(this.client.getFunctionConfiguration.bind(this.client), {
             FunctionName: resource.id,
-        }, (data: FunctionConfiguration) => data && data.MemorySize);
-    }
-
-    private static buildMetricStatisticsParams(metricName: MetricName, statistics: string[], resource: Resource, start: Date, end: Date): GetMetricStatisticsParams {
-        return {
-            nameSpace: 'AWS/Lambda',
-            metricName,
-            dimensions: [{ Name: 'FunctionName', Value: resource.id }],
-            startTime: start,
-            endTime: end,
-            period: 60 * metrics.METRIC_WINDOW,
-            statistics,
-        };
+        }, (data: FunctionConfiguration): MemorySize => data && data.MemorySize);
     }
 }

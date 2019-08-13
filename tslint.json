@@ -1,0 +1,30 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:latest",
+        "tslint-config-prettier"
+    ],
+    "jsRules": {},
+    "rules": {
+        "interface-name": [true, "never-prefix"],
+        "ban-types": [
+            true,
+            ["Object", "Avoid using the `Object` type. Did you mean `object`?"],
+            ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
+            ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
+            ["String", "Avoid using the `String` type. Did you mean `string`?"],
+            ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"]
+        ],
+        "no-submodule-imports": false,
+        "variable-name": {
+            "options": [
+                "ban-keywords",
+                "check-format",
+                "allow-leading-underscore",
+                "allow-pascal-case"
+            ]
+        },
+        "member-ordering": [true, {"order": "fields-first"}]
+    },
+    "rulesDirectory": []
+}

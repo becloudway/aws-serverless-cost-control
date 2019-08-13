@@ -1,8 +1,8 @@
 import * as AWS from 'aws-sdk';
-import {GetProductsResponse, GetProductsRequest, PriceListItemJSON} from 'aws-sdk/clients/pricing';
-import { ProductPricing } from '../types';
-import { AWSClient, wrapCallback } from './AWSClient';
+import { GetProductsRequest, GetProductsResponse } from 'aws-sdk/clients/pricing';
 import { regions } from '../config';
+import { PriceDimensionJson, ProductPricing, ProductPricingJson } from '../types';
+import { AWSClient, wrapCallback } from './AWSClient';
 
 export interface ProductFilter {
     field: string;
@@ -18,21 +18,21 @@ export interface GetProductsParams {
 export class PricingClient extends AWSClient<AWS.Pricing> {
     private static termType: string = 'OnDemand';
 
-    public static buildProductsFromPriceList(pricelist: any): ProductPricing {
+    public static buildProductsFromPriceList(pricelist: ProductPricingJson): ProductPricing {
         try {
             const terms = pricelist.terms && pricelist.terms[PricingClient.termType];
 
             const { priceDimensions } = terms[Object.keys(terms)[0]];
-            const priceDimension = Object.keys(priceDimensions)
-                .map(key => priceDimensions[key])
-                .find(pd => pd.endRange === 'Inf');
-            const pricePerUnit = priceDimension.pricePerUnit.USD || 0;
+            const priceDimension: PriceDimensionJson = Object.keys(priceDimensions)
+                .map((key: string): PriceDimensionJson => priceDimensions[key])
+                .find((pd: PriceDimensionJson): boolean => pd.endRange === 'Inf');
+            const pricePerUnit: string = priceDimension.pricePerUnit.USD || '0';
 
             return {
-                version: pricelist.version,
                 group: pricelist.product.attributes.group,
                 pricePerUnit: parseFloat(pricePerUnit),
                 unit: priceDimension.unit,
+                version: pricelist.version,
             };
         } catch (e) {
             return null;
@@ -65,7 +65,8 @@ export class PricingClient extends AWSClient<AWS.Pricing> {
             ServiceCode: serviceCode,
         });
 
-        if (!products || !products.PriceList) return [];
-        return products.PriceList.map(PricingClient.buildProductsFromPriceList).filter(i => i != null);
+        if (!products || !products.PriceList) { return []; }
+        // @ts-ignore
+        return products.PriceList.map(PricingClient.buildProductsFromPriceList).filter((i: ProductPricing): boolean => i != null);
     }
 }

@@ -92,3 +92,41 @@ export interface KinesisCostRecordWithAnomalyScore extends KinesisCostRecord {
     service: string;
     ANOMALY_SCORE: number;
 }
+
+export interface PriceDimensionJson {
+    unit: string;
+    endRange: string;
+    description: string;
+    appliesTo: string[];
+    rateCode: string;
+    beginRange: string;
+    pricePerUnit: {
+        USD: string;
+    };
+}
+
+export interface ProductPricingJson {
+    product: {
+        productFamily: string;
+        attributes: {
+            [key: string]: string;
+        };
+        sku: string;
+    };
+    serviceCode: string;
+    terms: {
+        [key: string]: {
+            [key: string]: {
+                priceDimensions: {
+                    [key: string]: PriceDimensionJson;
+                };
+                sku: string;
+                effectiveDate: string;
+                offerTermCode: string;
+                termAttributes: object;
+            };
+        };
+    };
+    version: string;
+    publicationDate: string;
+}

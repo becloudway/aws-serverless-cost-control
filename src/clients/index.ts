@@ -1,13 +1,13 @@
 import * as AWS from 'aws-sdk';
 import { regions } from '../config';
 import { CloudwatchClient } from './CloudwatchClient';
-import { TagClient } from './TagClient';
-import { PricingClient } from './PricingClient';
-import { LambdaClient } from './LambdaClient';
 import { DynamoDBClient } from './DynamoDBClient';
-import { SNSClient } from './SNSClient';
-import { RDSClient } from './RDSClient';
 import { KinesisClient } from './KinesisClient';
+import { LambdaClient } from './LambdaClient';
+import { PricingClient } from './PricingClient';
+import { RDSClient } from './RDSClient';
+import { SNSClient } from './SNSClient';
+import { TagClient } from './TagClient';
 
 const { CURRENT_REGION: REGION, NORTH_VIRGINIA } = regions;
 const cloudwatchClient = new CloudwatchClient(new AWS.CloudWatch({ apiVersion: '2010-08-01', region: REGION }));

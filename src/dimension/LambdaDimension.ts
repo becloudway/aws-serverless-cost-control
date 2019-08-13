@@ -1,6 +1,6 @@
-import { Dimension } from './Dimension';
-import { log } from '../logger';
 import { lambdaClient } from '../clients';
+import { log } from '../logger';
+import { Dimension } from './Dimension';
 
 export class LambdaDimension extends Dimension {
     private _averageDuration: number = 0;

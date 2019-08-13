@@ -1,5 +1,5 @@
-import { Dimension } from './Dimension';
 import { rdsClient } from '../clients';
+import { Dimension } from './Dimension';
 
 export class RDSDimension extends Dimension {
     private _auroraCapacityUnits: number = 0;

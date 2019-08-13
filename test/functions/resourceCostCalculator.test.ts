@@ -10,7 +10,7 @@ import { Resource, ResourceManager } from '../../src/resource';
 import { buildResource, buildSNSRecord } from '../_helpers/builders';
 import { metrics, SERVICE_LAMBDA, TAGS } from '../../src/config';
 import { CostRecord, Pricing } from '../../src/pricing';
-import { DateTime } from '../../src/util';
+import { DateTime } from '../../src/utils';
 import { createMockInstance } from '../_helpers/mocks';
 
 jest.mock('../../src/logger');

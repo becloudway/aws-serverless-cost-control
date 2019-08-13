@@ -1,10 +1,10 @@
-import * as config from '../config';
-import { DateRange, LambdaResponse, ResourceTag } from '../types';
 import { cloudwatchClient, snsClient } from '../clients';
+import * as config from '../config';
 import { log } from '../logger';
-import { ResourceManager } from '../resource';
-import { DateTime } from '../util';
 import { CostRecord } from '../pricing';
+import { ResourceManager } from '../resource';
+import { DateRange, LambdaResponse, ResourceTag } from '../types';
+import { DateTime } from '../utils';
 
 export const handler = async (): Promise<LambdaResponse> => {
     try {
@@ -32,27 +32,27 @@ export const handler = async (): Promise<LambdaResponse> => {
         // CREATE COST METRICS
         await Promise.all(costRecords.map(costRecord => cloudwatchClient.putCostMetricData({
             metricName: config.metrics.NAME_COST,
-            value: costRecord.pricing.totalCost,
             resourceId: costRecord.resource.id,
-            timestamp: dateRange.end,
             service: costRecord.resource.service,
+            timestamp: dateRange.end,
+            value: costRecord.pricing.totalCost,
         })));
 
         // CREATE ESTIMATED CHARGES METRICS
         await Promise.all(costRecords.map(costRecord => cloudwatchClient.putCostMetricData({
             metricName: config.metrics.NAME_ESTIMATEDCHARGES,
-            value: costRecord.pricing.estimatedMonthlyCharge,
             resourceId: costRecord.resource.id,
-            timestamp: dateRange.end,
             service: costRecord.resource.service,
+            timestamp: dateRange.end,
+            value: costRecord.pricing.estimatedMonthlyCharge,
         })));
 
         return { status: 200 };
     } catch (e) {
         log.error('Something went wrong', e);
         return {
-            status: 400,
             message: e.message,
+            status: 400,
         };
     }
 };

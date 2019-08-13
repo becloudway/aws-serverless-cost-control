@@ -1,8 +1,8 @@
 import { createLogger } from 'bunyan';
 
 const log = createLogger({
-    name: 'scc',
     level: 'debug',
+    name: 'scc',
 });
 
 export { log };
