@@ -5,6 +5,6 @@ cache:
   directories:
     - "$HOME/.npm"
 before_script:
-  - npm install -g codecov
+  - npm install -g codacy-coverage
 script:
   - npm run report-coverage
