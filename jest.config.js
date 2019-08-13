@@ -1,5 +1,8 @@
 module.exports = {
     preset: 'ts-jest',
+    coverageDirectory: './coverage/',
+    collectCoverage: true,
+    collectCoverageFrom: ['./src/**/*.ts'],
     testEnvironment: 'node',
     testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.[t]sx?$',
     setupFiles: ['dotenv/config'],
