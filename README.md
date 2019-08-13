@@ -4,9 +4,7 @@
   <a href="https://travis-ci.org/becloudway/aws-serverless-cost-control">
   <img alt="Testing" src="https://travis-ci.org/becloudway/aws-serverless-cost-control.svg?branch=master" />
   </a>
-  <a href="https://codecov.io/gh/becloudway/aws-serverless-cost-control">
-    <img alt="Coverage" src="https://codecov.io/gh/becloudway/aws-serverless-cost-control/branch/master/graph/badge.svg" />
-  </a>
+<a alt="Coverage" href="https://www.codacy.com/app/Cloudway/aws-serverless-cost-control?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=becloudway/aws-serverless-cost-control&amp;utm_campaign=Badge_Coverage"><img src="https://api.codacy.com/project/badge/Coverage/31bc7f05f62944168f7249bf1280cc7b"/></a>
   <a alt="Code Quality" href="https://www.codacy.com/app/Cloudway/aws-serverless-cost-control?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=becloudway/aws-serverless-cost-control&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/31bc7f05f62944168f7249bf1280cc7b"/></a>
 </p>
 
