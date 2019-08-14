@@ -12,6 +12,8 @@
 
 ### 🏠 [Homepage](https://github.com/becloudway/aws-serverless-cost-control)
 
+For detailed usage information consult the [Wiki](https://github.com/becloudway/aws-serverless-cost-control/wiki)
+
 ## Install
 
 ```sh
@@ -19,19 +21,6 @@ npm install
 ```
 
 ## Usage
-
-### Configuration
-
-1. Deploy cloudformation stack (TODO: add button)
-
-2. Provide the following parameters:
-    *   `MetricNameSpace` (default: _Cloudway/Serverless/Monitoring_)
-    *   `Environment` (default: _dev_)
-    *   `ApplicationName` (default: _cloudway-scc_)
-    *   `MonitorEmail`
-    *   `IncludeTags`: if provided, only resources with given tags with value "true" will be included (comma separted list).
-    *   `ExcludeTags`: exclude resources with given tag(s)
-
 
 ## Run tests
 
