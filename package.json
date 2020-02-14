@@ -31,7 +31,7 @@
     "node": ">=10.15.0"
   },
   "dependencies": {
-    "aws-lambda": "^0.1.2",
+    "aws-lambda": "^1.0.5",
     "aws-sdk": "^2.507.0",
     "bunyan": "^1.8.12",
     "date-fns": "^1.30.1",
